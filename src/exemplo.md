@@ -292,6 +292,69 @@ para cada *spurious hit*, o que aumenta o tempo total de execução.
 ---
 
 FIM DO BLOCO DE HASHING
+## Introduzindo o algoritmo de Rabin-Karp
+
+A resposta para tornar a busca ainda mais eficiente está em duas ideias-chave:
+1. O uso de **hashing**;
+2. E, mais importante, uma otimização genial chamada **rolling hash**.
+
+O **hash** funciona como uma “impressão digital” de um texto:  
+cada string é convertida em um único número.  
+Se duas strings são iguais, seus hashes também são iguais;  
+e se os hashes são diferentes, sabemos com 100% de certeza que as strings não coincidem.  
+Isso permite comparar números em vez de letras — e por isso o processo é muito mais rápido.
+
+---
+
+### Rolling Hash — a ideia central do Rabin-Karp
+
+Agora surge a pergunta: *como calcular os hashes de cada trecho sem refazer tudo do zero?*  
+É aqui que entra o **rolling hash**, a técnica que torna o algoritmo Rabin-Karp eficiente.
+
+Vamos pensar em um exemplo:
+
+**Texto:** `a d a a b c`  
+**Padrão:** `a a b`  
+*(a=1, b=2, c=3, d=4)*  
+
+Para o padrão `a a b`, calculamos o hash em base 10:  
+`1×10² + 1×10¹ + 2×10⁰ = 112`.  
+Esse é o **hash do padrão**.
+
+---
+
+### Aplicando a janela deslizante
+
+A primeira janela do texto cobre “a d a”:  
+hash = `1×10² + 4×10¹ + 1×10⁰ = 141`.  
+Como 141 ≠ 112, ainda não encontramos o padrão.
+
+Agora vem a mágica do **rolling hash**.  
+Quando a janela desliza, não recalculamos tudo:  
+- removemos o valor do caractere que saiu,  
+- “empurramos” os valores multiplicando por 10,  
+- e adicionamos o novo caractere.
+
+Por exemplo, ao mover de “a d a” → “d a a”:  
+hash = `(141 − 1×10²) × 10 + 1 = 411`.
+
+E de “d a a” → “a a b”:  
+hash = `(411 − 4×10²) × 10 + 2 = 112`.
+
+Como o valor agora **é igual ao hash do padrão (112)**, encontramos uma correspondência — um **match**.
+
+---
+
+### Conclusão
+
+Essa é a essência do **Rabin-Karp**:  
+usar **hashes numéricos** para acelerar a comparação, e **rolling hash** para evitar cálculos repetidos.  
+O resultado é uma busca eficiente com complexidade média **O(N + M)**, mas que continua precisa mesmo em casos de colisão de hash.
+
+
+
+
+
 
 Você também pode criar
 
