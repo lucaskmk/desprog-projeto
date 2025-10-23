@@ -88,13 +88,6 @@ Definitivamente não. É um custo computacional altíssimo. Precisamos de uma fo
 ???
 
 ---------
-
-Um algoritmo de busca em texto serve para encontrar palavras ou frases dentro de um texto.
-Ele compara o que você procura (chamado de **padrão**) com o conteúdo do **texto**, verificando onde há uma coincidência.
-
-O método mais simples é ir letra por letra, testando o padrão em cada posição e pegar o **índice**.
-
----------
 ## A Ideia Principal: Hashing
 
 **Hashing** é uma ideia matemática que transforma o texto em números.  A melhor forma de pensar nisso é como se fosse uma “impressão” digital” de um texto. O algoritmo pega uma string, que pode ser longa, e converte em um único numero.
@@ -177,6 +170,28 @@ Calcule o hash de cada trecho de tamanho M = 3 e compare com o hash do padrão.
 :::
 ???
 
+---
+
+!!! Otimização: Evitando Recálculos
+
+Você deve ter notado que no Exercício 3, recalcular o hash (`1+1+1`), (`1+1+1`), etc., parece repetitivo.
+
+Não precisamos! Podemos "deslizar" o hash em tempo $O(1)$ usando uma fórmula simples, pois é apenas uma soma:
+
+h(next) = h(curr) − value(outgoing) + value(incoming)
+
+**Exemplo:**
+* Hash atual (índice 2-4) ` "A A A"` = **3**
+* Próxima janela (índice 3-5) ` "A A B"`
+* Sai o caractere: 'A' (valor 1)
+* Entra o caractere: 'B' (valor 2)
+* Novo Hash = 3 - 1 + 2 = **4**
+
+Esta técnica de atualização em $O(1)$ é o "pulo do gato" que nos permite deslizar a janela eficientemente.
+!!!
+
+---
+
 
 ??? Exercício 4 – Reflexão
 
@@ -202,7 +217,7 @@ Explique o motivo.
 Quando não há falsos positivos, o algoritmo realiza apenas as comparações de hash,  
 percorrendo o texto uma vez e calculando o hash do padrão.
 
-➡️ Complexidade: **O(N + M)**  
+Complexidade: **O(N + M)**  
 *(onde N é o tamanho do texto e M o tamanho do padrão)*
 
 O algoritmo é rápido, pois não precisa fazer verificações adicionais.
@@ -234,7 +249,7 @@ Esses casos aumentam o custo da busca, podendo levar à complexidade **O(N·M)**
 |:-------|:-:|:-:|:-:|
 | Padrão | B | C | A |
 
-Suponha valores `A=1, B=2, C=3, D=4` e função hash = soma dos valores.
+Suponha valores ` A=1, B=2, C=3, D=4` e função hash = soma dos valores.
 
 
 **Exemplo ilustrativo:**
@@ -282,9 +297,9 @@ Explique se ele se torna mais lento nesse caso.
 Quando ocorrem falsos positivos, o algoritmo precisa **comparar caractere por caractere**  
 em cada posição onde o hash é igual — aumentando o número de operações.
 
-➡️ Complexidade: **O(N·M)**
+Complexidade: **O(N·M)**
 
-💡 Isso acontece porque, além de percorrer o texto, o algoritmo faz novas comparações completas  
+Isso acontece porque, além de percorrer o texto, o algoritmo faz novas comparações completas  
 para cada *spurious hit*, o que aumenta o tempo total de execução.
 :::
 ???
@@ -368,14 +383,11 @@ Vamos comparar os dois padrões:
 
 ---
 
-## Rolling Hash — a ideia central do Rabin-Karp
+## Implementando o Rolling Hash
 
 Para evitar recalcular a soma inteira a cada passo, usa-se um **rolling hash**: 
 a partir do hash do trecho atual, subtrai-se o valor do caractere que saiu e adiciona-se o valor do caractere que entrou. Assim o custo por deslocamento fica O(1) (em vez de O(M)). É a ideia básica por trás do **algoritmo de Rabin-Karp**.
 
-!!! Fórmula simples (soma):
-h(next) = h(curr) − value(outgoing) + value(incoming)
-!!!
 
 ---
 ### Aplicando a Janela Deslizante (Rolling Hash)
