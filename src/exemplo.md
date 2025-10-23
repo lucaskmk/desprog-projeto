@@ -119,35 +119,33 @@ que são números que resumem cada trecho do texto.
 **Texto:** N = 6
 | Índice | 0 | 1 | 2 | 3 | 4 | 5 |
 |:-------|:-:|:-:|:-:|:-:|:-:|:-:|
-| Texto  | a | a | a | a | a | b |
+| Texto  | A | A | A | A | A | B |
 
 **Padrão:** M = 3
 
 | Índice | 0 | 1 | 2 |
 |:-------|:-:|:-:|:-:|
-| Padrão | a | a | b |
+| Padrão | A | A | B |
 
 **Exercício 1 – Hash Padrão**
 
 A ideia de um hash padrão é transformar o padrão em um número, somando os valores de cada caractere.
 Assim, o algoritmo pode comparar números em vez de letras, tornando a busca muito mais rápida.
-Por exemplo, se atribuirmos a = 1 e b = 2, o padrão **a** **a** **b** pode ser representado por um hash que é...
+Por exemplo, se atribuirmos a = 1 e b = 2, o padrão ` A A B` pode ser representado por um hash que é...
 
 ::: Gabarito
-**Solução:**  
-**a** **a** **b** = 1 + 1 + 2 = **4**  
+A A B = 1 + 1 + 2 = **4**  
 :::
 ???
 
 
 ??? Exercício 2 – Hash do Primeiro Trecho do Texto
 
-Agora, calcule o hash dos **3 primeiros caracteres** do texto **a** **a** **a**:
+Agora, calcule o hash dos **3 primeiros caracteres** do texto ` A A A`:
 Qual é o valor do hash desse trecho?
 
 ::: Gabarito
-**Solução:**  
-**a** **a** **b** = 1 + 1 + 1 = **3**
+A A A = 1 + 1 + 1 = **3**
 :::
 ???
 
@@ -158,20 +156,18 @@ Calcule o hash de cada trecho de tamanho M = 3 e compare com o hash do padrão.
 
 | Posição | Trecho | h(t) | Igual ao h(p)? |
 |----------|---------|------|----------------|
-| 0–2 | a a a | ? | ? |
-| 1–3 | a a a | ? | ? |
-| 2–4 | a a a | ? | ? |
-| 3–5 | a a b | ? | ? |
+| 0–2 | A A A | ? | ? |
+| 1–3 | A A A | ? | ? |
+| 2–4 | A A A | ? | ? |
+| 3–5 | A A B | ? | ? |
 
 ::: Gabarito
-**Solução:**
-
 | Posição | Trecho | h(t) | Igual ao h(p)? |
 |----------|---------|------|----------------|
-| 0–2 | a a a | 3 | ❌ |
-| 1–3 | a a a | 3 | ❌ |
-| 2–4 | a a a | 3 | ❌ |
-| 3–5 | a a b | 4 | ✅ |
+| 0–2 | A A A | 3 | ❌ |
+| 1–3 | A A A | 3 | ❌ |
+| 2–4 | A A A | 3 | ❌ |
+| 3–5 | A A B | 4 | ✅ |
 
 ✅ O padrão foi encontrado **na posição 4** do texto.
 :::
@@ -186,6 +182,26 @@ Por que o algoritmo usa o valor de hash em vez de comparar caractere por caracte
 Porque comparar apenas os **valores hash** é **muito mais rápido**:  
 em vez de comparar cada letra, o algoritmo compara **números resumidos** de cada trecho.  
 Se os números são diferentes, ele já sabe que o trecho não combina — sem precisar verificar caractere por caractere.
+:::
+???
+
+??? Exercício 5 – Complexidade sem falsos positivos
+
+O algoritmo encontrou **apenas um resultado correto** e **nenhum falso positivo**.  
+Ou seja, ele percorreu o texto comparando apenas os valores de hash, sem precisar verificar caractere por caractere.
+
+**Pergunta:**  
+Qual é a complexidade desse caso?  
+Explique o motivo.
+
+::: Gabarito
+Quando não há falsos positivos, o algoritmo realiza apenas as comparações de hash,  
+percorrendo o texto uma vez e calculando o hash do padrão.
+
+➡️ Complexidade: **O(N + M)**  
+*(onde N é o tamanho do texto e M o tamanho do padrão)*
+
+O algoritmo é rápido, pois não precisa fazer verificações adicionais.
 :::
 ???
 
@@ -221,7 +237,7 @@ Suponha valores `a=1, b=2, c=3, d=4` e função hash = soma dos valores.
 
 ---
 
-??? Exercício 4 — Identificando *spurious hits*
+??? Exercício 6 — Identificando *spurious hits*
 
 1. Calcule o **hash do padrão** ->  ` b c a`.  
 2. Depois, calcule o hash de cada trecho de 3 caracteres do texto.  
@@ -235,7 +251,7 @@ Suponha valores `a=1, b=2, c=3, d=4` e função hash = soma dos valores.
 | 3–5 | a b c | ? |
 
 ::: Gabarito
-**Solução – Falsos positivos encontrados:**
+**Falsos positivos encontrados:**
 
 | Posição | Trecho | h(t) |
 |----------|---------|------|
@@ -253,6 +269,26 @@ Para evitar recalcular a soma inteira a cada passo, usa-se um **rolling hash**: 
 **Fórmula simples (soma):**  
 h(next) = h(curr) − value(outgoing) + value(incoming)
 
+??? Exercício 7 – Complexidade com falsos positivos (*spurious hits*)
+
+Alguns trechos diferentes do texto geraram **o mesmo valor de hash** do padrão,  
+mas ao comparar os caracteres, o algoritmo percebeu que **não eram correspondências reais** (*spurious hits*).
+
+**Pergunta:**  
+Como isso afeta a complexidade do algoritmo?  
+Explique se ele se torna mais lento nesse caso.
+
+::: Gabarito
+
+Quando ocorrem falsos positivos, o algoritmo precisa **comparar caractere por caractere**  
+em cada posição onde o hash é igual — aumentando o número de operações.
+
+➡️ Complexidade: **O(N·M)**
+
+💡 Isso acontece porque, além de percorrer o texto, o algoritmo faz novas comparações completas  
+para cada *spurious hit*, o que aumenta o tempo total de execução.
+:::
+???
 ---
 
 FIM DO BLOCO DE HASHING
