@@ -38,9 +38,6 @@ Vamos ver isso em ação com nosso exemplo. O **padrão** é "roupa" (tamanho 5)
 
 :rato
 
-**Match!** Retorna o índice 14. (5 comparações)
-
-
 ??? Checkpoint
 
 Vamos pensar no custo disso. Considere um Texto com n caracteres e um Padrão com **M** caracteres.
@@ -214,7 +211,7 @@ Otimizar o recálculo para $O(1)$ é ótimo, mas nossa função de hash (soma si
 
 **Falsos positivos** (ou *spurious hits*) acontecem quando **dois trechos diferentes** produzem o **mesmo valor de hash**, mesmo que os caracteres não sejam iguais.
 
-Quando isso ocorre, o algoritmo compara o hash (que bate!) e é forçado a verificar caractere por caractere, apenas para descobrir que era um alarme falso. Esses casos aumentam o custo da busca, podendo levar à complexidade $O(N·M)$ no pior caso (imagine um texto `AAAAA` e um padrão `B`).
+Quando isso ocorre, o algoritmo compara o hash (que bate!) e é forçado a verificar caractere por caractere, apenas para descobrir que era um alarme falso. Esses casos aumentam o custo da busca, podendo levar à complexidade $O(N·M)$.
 
 ---
 
@@ -261,7 +258,7 @@ Suponha valores ` A=1, B=2, C=3, D=4` e função hash = soma dos valores.
 | 2-4 | A A B | 4 |
 | 3–5 | A B C | 6 |
 
-Os trechos "A D A", "D A A" e "A B C" têm hash **6**, igual ao do padrão ` B C A`,  
+Os trechos **"A D A"**, **"D A A"** e **"A B C"** têm hash **6**, igual ao do padrão ` B C A`,  
 mas nenhum deles corresponde realmente ao padrão - são *spurious hits*.
 :::
 ???
@@ -279,9 +276,9 @@ Explique se ele se torna mais lento nesse caso.
 
 Quando ocorrem falsos positivos, o algoritmo precisa **comparar caractere por caractere** em cada posição onde o hash é igual - aumentando o número de operações.
 
-Complexidade: **O(N·M)**
+Complexidade: $O(N·M)$
 
-Isso acontece porque, no pior caso, o algoritmo pode ter que fazer uma comparação completa (O(M)) em *todas* as N janelas, assim como a força bruta.
+Isso acontece porque, no pior caso, o algoritmo pode ter que fazer uma comparação completa $O(M)$ em *todas* as N janelas, assim como a força bruta.
 :::
 ???
 ---
@@ -302,31 +299,52 @@ A resposta para tornar a busca ainda mais eficiente está em duas ideias-chave:
 ## Construindo o hash com potências de 10
 
 Até agora, usamos a soma simples (ex: 1 + 1 + 2).  
+
 Mas o **Rabin-Karp** trata a string como um número em uma **base**,  
-onde cada posição tem um peso diferente ($10^0, 10^1, 10^2$…).
+onde cada posição tem um peso diferente ($10^{m-1}, 10^{m-2},… 10^0$).
 
 Assim, strings diferentes raramente terão o mesmo hash —  
 reduzindo o risco de **falsos positivos**.
 
 ---
-??? Exercício 8 — Calculando o hash polinomial
+??? Exercício 8 — Recalcule com base = 10
+
+**Instruções:** usando **base = 10** e os valores ` A = 1`, ` B = 2`, ` C = 3`, ` D = 4`,  
+calcule o hash posicional (com potências) de cada trecho de tamanho 3 e compare com o hash do padrão ` B C A`.
 
 Use a fórmula:
 
-$$h(p) = p_0 \times 10^{M-1} + p_1 \times 10^{M-2} + \dots + p_{M-1} \times 10^0
-$$
+$h(\text{trecho}) = p_0\times10^2 + p_1\times10^1 + p_2\times10^0$
 
-Sabendo que:
-- **p** = ` "AAB"` ($p0=1, p1=1, p2=2$)
-- **base d** = 10
-- **M** = 3
 
-Dado o padrão ` A A B` e **base = 10**,  
-com valores `A=1`, `B=2`, calcule o **hash** usando potências:
+Tabela original (para referência):
+
+| Posição | Trecho | h(t) |
+|----------|---------|------|
+| 0–2 | A D A | 6 |
+| 1–3 | D A A | 6 |
+| 2-4 | A A B | 4 |
+| 3–5 | A B C | 6 |
+
+1. Calcule o **hash do padrão** ` B C A`.  
+2. Calcule o hash dos trechos que tinham dado o mesmo valor do padrão.  
 
 ::: Gabarito
-$$h(p) = (1\times10^2) + (1\times10^1) + (2\times10^0) = $$
-$$h(p) = 1\times100 + 1\times10 + 2\times1 = 112 $$
+**Cálculos e respostas:**
+
+- **Hash do padrão ` B C A`:**  
+  $h_p = 2\times10^2 + 3\times10^1 + 1\times10^0 = 200 + 30 + 1 = \mathbf{231}$
+
+- **Hashes dos trechos (base = 10):**
+
+| Posição | Trecho | h(t) |
+|---------|--------|------:|
+| 0–2     | A D A  | 141   |
+| 1–3     | D A A  | 411   |
+| 2–4     | A A B  | 112   |
+| 3–5     | A B C  | 123   |
+
+**Conclusão:** nenhum dos trechos tem hash igual a **231**, portanto **não há spurious hits** neste esquema posicional (base = 10).
 :::
 ???
 
@@ -338,11 +356,12 @@ $$h(p) = 1\times100 + 1\times10 + 2\times1 = 112 $$
 ::: Gabarito
 
 1. Usar potências faz com que **a posição de cada caractere influencie o resultado**.  
-   Diferente da soma, a ordem agora importa: “A B” ≠ “B A”.
+   Diferente da soma, a ordem agora importa: “A B C” ≠ “B C A”.
 Vamos comparar os dois padrões com $d=10$:
-- ` A B` = (1 × 10¹) + (2 × 10⁰) = 12 
-- ` B A` = (2 × 10¹) + (1 × 10⁰) = 21 
-(Na soma simples, ambos seriam '3').
+- ` A B C` = $(1\times10^2)+(2\times10^1)+(3\times10^0)=123$
+- ` B C A` = $(2\times10^2)+(3\times10^1)+(1\times10^0)=231$ 
+
+(Na soma simples, ambos seriam '6').
 
 2. O cálculo direto do hash tem complexidade **O(M)**,  
    pois percorre cada caractere uma vez para aplicar a fórmula.  
@@ -350,14 +369,12 @@ Vamos comparar os dois padrões com $d=10$:
 :::
 ???
 
+!!!Implementando o Rolling Hash
 
-!!!
-## Implementando o Rolling Hash
-
-O problema do hash polinomial é que, ingenuamente, ele também parece ser O(M) para calcular em cada janela (como no Exercício 9). Se fizermos isso, voltamos à complexidade O(N\*M).
+O problema do hash polinomial é que, ingenuamente, ele também parece ser $O(M)$ para calcular em cada janela (como no Exercício 8). Se fizermos isso, voltamos à complexidade $O(N\times M)$.
 
 Para evitar recalcular a soma inteira a cada passo, usa-se um **rolling hash**: 
-a partir do hash do trecho atual, subtrai-se o valor do caractere que saiu e adiciona-se o valor do caractere que entrou. Assim o custo por deslocamento fica O(1) (em vez de O(M)).
+a partir do hash do trecho atual, subtrai-se o valor do caractere que saiu e adiciona-se o valor do caractere que entrou. Assim o custo por deslocamento fica $O(1)$ (em vez de $O(M)$).
 !!!
 ---
 ## Aplicando a Janela Deslizante 
