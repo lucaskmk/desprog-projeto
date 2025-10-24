@@ -399,30 +399,32 @@ onde:
 
 ??? Exercício 10 – Acompanhe o Rolling Hash
 
-**Texto:** `a d a a b c`  
-**Padrão:** `a a b`  
-Valores: `a=1`, `b=2`, `c=3`, `d=4`, base $d=10$, $M=3$
+**Texto:**  ` A D A A B C`  
+**Padrão:** ` A A B`  
+**Valores:** ` A=1`, ` B=2`, ` C=3`, ` D=4`, base $d=10$, $M=3$
 
-1. Calcule o hash do padrão `a a b`.  
-2. Calcule o hash da primeira janela (`a d a`).  
+1. Calcule o hash do **padrão** ` A A B`.  
+2. Calcule o hash da primeira janela (` A D A`).  
 3. Aplique a fórmula do *rolling hash* (sem módulo, para simplificar) para encontrar o valor das janelas seguintes:  
-   - `"a d a"` → `"d a a"`  
-   - `"d a a"` → `"a a b"`  
+   - ` A D A` → ` D A A`  
+   - ` D A A` → ` A A B`  
 4. Onde ocorre o *match*?
 
 ::: Gabarito
-1. $h(padrão) = (1 \times 10^2) + (1 \times 10^1) + (2 \times 10^0) = 112 $ 
-2. $h_0 \text{ ("ada")} = (1 \times 10^2) + (4 \times 10^1) + (1 \times 10^0) = 141$
+1. $h(padrão)=(1 \times 10^2)+(1 \times 10^1)+(2 \times 10^0)=112$ 
+2. 
+* **Janela 1 (A D A):**
+    * $(1 \times 10^2)+(4 \times 10^1)+(1 \times 10^0)=141$
 3. 
-* **Janela 1 (`"daa"`):**
+* **Janela 2 (D A A):**
     * $h_1 = (h_0 - p_{out} \times d^{M-1}) \times d + p_{in}$
     * $h_1 = (141 - 1 \times 10^2) \times 10 + 1$
     * $h_1 = (141 - 100) \times 10 + 1 = 41 \times 10 + 1 = 411$
-* **Janela 2 (`"aab"`):**
+* **Janela 3 (A A B):**
     * $h_2 = (h_1 - p_{out} \times d^{M-1}) \times d + p_{in}$
     * $h_2 = (411 - 4 \times 10^2) \times 10 + 2$
     * $h_2 = (411 - 400) \times 10 + 2 = 11 \times 10 + 2 = 112$
-4. *Match* encontrado! $h_2$ (112) == $h(padrão)$ (112). A janela começa no índice **3**.
+4. **Match** encontrado! $h_2$ (112) == $h(padrão)$ (112). A janela começa no índice **2**.
 :::
 ???
 
