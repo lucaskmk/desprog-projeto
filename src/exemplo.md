@@ -31,6 +31,8 @@ Resposta = 14
 
 ## A Abordagem "Força Bruta"
 
+:rato
+
 A primeira solução que vem à mente é a "força bruta". A ideia é simples: "deslizar" o padrão pelo texto, 
 uma posição de cada vez, e comparar caractere por caractere.
 
