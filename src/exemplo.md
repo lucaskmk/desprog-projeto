@@ -6,8 +6,11 @@ Algoritmo Busca em Texto
 
 ## O Problema da Busca
 
-Vamos começar definindo o problema: temos um Texto (uma longa sequência de caracteres, como o código-fonte de um programa)
-e um Padrão (uma sequência menor, como o nome de uma função) . Queremos encontrar a Posição (o índice)
+Vamos começar definindo o problema: 
+* Temos um Texto (uma longa sequência de caracteres, como o código-fonte de um programa).
+* E um Padrão (uma sequência menor, como o nome de uma função). 
+
+Queremos encontrar a Posição (o índice)
 onde o padrão aparece pela primeira vez no texto.
 
 ??? Problema da Busca
