@@ -7,8 +7,8 @@ Algoritmo Busca em Texto
 ## O Problema da Busca
 
 Vamos começar definindo o problema: 
-* Temos um Texto (uma longa sequência de caracteres, como o código-fonte de um programa).
-* E um Padrão (uma sequência menor, como o nome de uma função). 
+* Temos um Texto (uma longa sequência de caracteres).
+* E um Padrão (uma sequência menor). 
 
 Queremos encontrar a Posição (o índice)
 onde o padrão aparece pela primeira vez no texto.
@@ -43,55 +43,28 @@ Vamos ver isso em ação com nosso exemplo. O **padrão** é "roupa" (tamanho 5)
 
 ??? Checkpoint
 
-Vamos pensar no custo disso. Considere um Texto com n caracteres e um Padrão com m caracteres.
+Vamos pensar no custo disso. Considere um Texto com n caracteres e um Padrão com **M** caracteres.
 
 No pior caso possível (ex: Texto = "AAAAAAAAAAAAAAAAAB" e Padrão = "AAB"), quantas comparações de caracteres o algoritmo de força bruta teria que fazer? 
 
 ::: Gabarito
 
-O algoritmo teria que "deslizar" a janela n−m+1 vezes. Em cada uma dessas posições, ele poderia ter que comparar até m caracteres.
+O algoritmo teria que "deslizar" a janela N−M+1 vezes. Em cada uma dessas posições, ele poderia ter que comparar até **M** caracteres.
 
-Isso nos dá uma complexidade de O((n−m+1)×m), que simplificamos para O(n×m).
+Isso nos dá uma complexidade de $O((N−M+1)×M)$, que simplificamos para $O(N×M)$.
 
 :::
 ???
-
-
-```c
-#include <stdio.h>
-#include <string.h>
-
-void busca_forca_bruta(const char *texto, const char *padrao) {
-
-    int n = strlen(texto);
-    int m = strlen(padrao);
-
-    for (int i = 0; i <= n - m; i++) {
-        int match = 1; 
-        for (int j = 0; j < m; j++) {
-            if (texto[i + j] != padrao[j]) {
-                match = 0; // Não é um match
-                break;     // Para o loop interno
-            }
-        }
-        if (match) {
-            printf("Padrão encontrado no índice %d\n", i);
-        }
-    } // Complexidade Total = O(N) * O(M) = O(N*M)
-}
-```
-
-Aqui está um exemplo de código que representa essa complexidade O(N\*M) no cálculo de um hash.
 
 ??? Checkpoint
 
 Imagine um cenário real, como um sistema de verificação de plágio.
 
-    Texto (base de dados inteira) com n=1.000.000.000 caracteres.
+    Texto (base de dados inteira) com **N = 1.000.000.000** caracteres.
 
-    Padrão (frase do aluno) com m=100 caracteres.
+    Padrão (frase do aluno) com **M = 100** caracteres.
 
-Uma complexidade de O(n×m) parece eficiente? 
+Uma complexidade de $O(N×M)$ parece eficiente? 
 
 ::: Gabarito
 
@@ -108,8 +81,6 @@ A regra de ouro do hashing é: se duas strings são idênticas, seus hashes têm
 
 Em vez de comparar cada caractere do texto com o padrão, o algoritmo compara apenas os **valores hash**,  
 o que é muito mais rápido.
-
-![](hash1.png)
 
 ---
 ??? Para os exercicios a seguir adote:
@@ -168,7 +139,7 @@ A A A = 1 + 1 + 1 = 3
 
 Calcule o hash de cada trecho de tamanho M = 3 e compare com o hash do padrão.
 
-| Posição | Trecho | h(t) | Igual ao h(p)? |
+| Posição | Trecho | h(t ) | Igual ao h(p ) ? |
 |----------|---------|------|----------------|
 | 0–2 | A A A | ? | ? |
 | 1–3 | A A A | ? | ? |
@@ -176,7 +147,7 @@ Calcule o hash de cada trecho de tamanho M = 3 e compare com o hash do padrão.
 | 3–5 | A A B | ? | ? |
 
 ::: Gabarito
-| Posição | Trecho | h(t) | Igual ao h(p)? |
+| Posição | Trecho | h(t) | Igual ao h(p ) ? |
 |----------|---------|------|----------------|
 | 0–2 | A A A | 3 | ❌ |
 | 1–3 | A A A | 3 | ❌ |
@@ -231,19 +202,19 @@ Explique o motivo.
 
 ::: Gabarito
 Quando não há falsos positivos, o algoritmo realiza apenas as comparações de hash,  
-percorrendo o texto uma vez (O(N)) e calculando o hash do padrão (O(M)).
+percorrendo o texto uma vez $O(N)$ e calculando o hash do padrão $O(M)$.
 
-Complexidade: **O(N + M)** O algoritmo é rápido, pois não precisa fazer verificações adicionais caractere a caractere.
+Complexidade: $O(N + M)$ O algoritmo é rápido, pois não precisa fazer verificações adicionais caractere a caractere.
 :::
 ???
 ---
 ## Problema dos *Spurious Hits* (falsos positivos)
 
-Otimizar o recálculo para O(1) é ótimo, mas nossa função de hash (soma simples) ainda tem um problema grave.
+Otimizar o recálculo para $O(1)$ é ótimo, mas nossa função de hash (soma simples) ainda tem um problema grave.
 
 **Falsos positivos** (ou *spurious hits*) acontecem quando **dois trechos diferentes** produzem o **mesmo valor de hash**, mesmo que os caracteres não sejam iguais.
 
-Quando isso ocorre, o algoritmo compara o hash (que bate!) e é forçado a verificar caractere por caractere, apenas para descobrir que era um alarme falso. Esses casos aumentam o custo da busca, podendo levar à complexidade **O(N·M)** no pior caso (imagine um texto `AAAAA` e um padrão `B`).
+Quando isso ocorre, o algoritmo compara o hash (que bate!) e é forçado a verificar caractere por caractere, apenas para descobrir que era um alarme falso. Esses casos aumentam o custo da busca, podendo levar à complexidade $O(N·M)$ no pior caso (imagine um texto `AAAAA` e um padrão `B`).
 
 ---
 
