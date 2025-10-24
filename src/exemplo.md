@@ -131,7 +131,9 @@ Assim, o algoritmo pode comparar números em vez de letras, tornando a busca mui
 Por exemplo, se atribuirmos ` A = 1` e ` B = 2`, o padrão ` A A B` pode ser representado por um hash que é...
 
 ::: Gabarito
-` A A B` = 1 + 1 + 2 = **4**  
+``` 
+A A B = 1 + 1 + 2 = 4 
+```
 :::
 ???
 
@@ -142,7 +144,9 @@ Agora, calcule o hash dos **3 primeiros caracteres** do texto ` A A A`:
 Qual é o valor do hash desse trecho?
 
 ::: Gabarito
-` A A A` = 1 + 1 + 1 = **3**
+``` 
+A A A = 1 + 1 + 1 = 3
+``` 
 :::
 ???
 
