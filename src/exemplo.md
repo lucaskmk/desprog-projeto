@@ -455,21 +455,220 @@ Valores: `a=1`, `b=2`, `c=3`, `d=4`, base $d=10$, $M=3$
 
 ---
 
-## Implementando o Rabin-Karp em C
+## Implementando Nossas Ideias em C
 
-Vamos construir o código C parte por parte, usando os conceitos que aprendemos.
-Para este exemplo, usaremos:
-- `text = "adaabc"`
-- `pattern = "aab"`
-- `d = 10` (base)
-- `q = 101` (número primo para módulo)
-- Valores: `a=1`, `b=2`, ... (faremos `char - 'a' + 1`)
+Vamos traduzir os conceitos que vimos para código C, passo a passo. Começaremos com a implementação mais simples (e ingênua) e vamos evoluí-la, assim como fizemos na teoria.
+
+Para todos os exemplos, vamos assumir:
+`A=1`, `B=2`, `C=3`, etc. (faremos `char - 'a' + 1`)
+
+---
+### Atividade de Código 1: O Hash de Soma Simples
+
+Primeiro, vamos apenas criar uma função em C que implementa a nossa primeira ideia de hash: a soma simples dos valores dos caracteres (como no Exercício 1).
+
+```c
+#include <stdio.h>
+#include <string.h>
+
+// Função de hash de soma simples
+int hash_soma_simples(const char *str, int len) {
+    int hash = 0;
+    for (int i = 0; i < len; i++) {
+        hash += (str[i] - 'a' + 1);
+    }
+    return hash;
+}
+
+int main(void) {
+    const char *padrao = "aab";
+    int m = strlen(padrao);
+    
+    int hash_padrao = hash_soma_simples(padrao, m);
+    
+    printf("Padrão: %s\n", padrao);
+    printf("Hash (soma): %d\n", hash_padrao);
+    
+    return 0;
+}
+```
+
+??? Atividade 1: Preveja a Saída
+
+Qual será a saída do programa acima?
+
+::: Gabarito
+O programa irá calcular `('a'-'a'+1) + ('a'-'a'+1) + ('b'-'a'+1)`, que é `1 + 1 + 2`.
+
+A saída será:
+Padrão: aab Hash (soma): 4
+:::
+???
+
+---
+### Atividade de Código 2: Algoritmo de Busca com Hash de Soma
+
+Agora, vamos usar essa função de hash para construir um algoritmo de busca. Esta será nossa primeira versão "ingênua":
+
+1.  Calculamos o hash do padrão (uma vez).
+2.  Iteramos por *todas* as janelas do texto.
+3.  Para *cada* janela, recalculamos seu hash do zero (O(M)).
+4.  Se os hashes baterem, comparamos caractere a caractere.
+
+```c
+#include <stdio.h>
+#include <string.h>
+
+// Função da atividade anterior
+int hash_soma_simples(const char *str, int len) {
+    int hash = 0;
+    for (int i = 0; i < len; i++) {
+        hash += (str[i] - 'a' + 1);
+    }
+    return hash;
+}
+
+// Função de verificação (força bruta)
+int checar_match(const char *txt, const char *pat, int start, int m) {
+    for (int j = 0; j < m; j++) {
+        if (txt[start + j] != pat[j]) {
+            return 0; // falha
+        }
+    }
+    return 1; // sucesso
+}
+
+int main(void) {
+    const char *texto = "aaaaab";
+    const char *padrao = "aab";
+    int n = strlen(texto);
+    int m = strlen(padrao);
+
+    int p_hash = hash_soma_simples(padrao, m);
+    printf("Hash do Padrão: %d\n\n", p_hash);
+
+    // Loop principal (passa por todas as janelas)
+    for (int i = 0; i <= n - m; i++) {
+        // Recalcula o hash do zero a cada passo! O(M)
+        int t_hash = hash_soma_simples(texto + i, m);
+        
+        printf("Janela %d: '%.*s' -> Hash = %d\n", i, m, texto + i, t_hash);
+
+        if (p_hash == t_hash) {
+            printf("  Hashes bateram! Verificando...\n");
+            if (checar_match(texto, padrao, i, m)) {
+                printf("  >> Match ENCONTRADO no índice %d\n", i);
+            } else {
+                printf("  >> Falso positivo!\n");
+            }
+        }
+    }
+    return 0;
+}
+```
+??? Atividade 2: Reflexão sobre Complexidade
+
+Qual é a complexidade de tempo do algoritmo da Atividade 2? Ele é realmente melhor que a força bruta original?
+
+::: Gabarito
+Em cada iteração `i` do loop principal (que roda `N-M` vezes), chamamos `hash_soma_simples(texto + i, m)`, que custa `O(M)`.
+
+Portanto, a complexidade total é `O((N-M) * M)`, ou simplesmente **O(N*M)**.
+
+Ele não é melhor que a força bruta. Na verdade, ele é *pior*, pois faz `O(N*M)` para calcular os hashes e *ainda* pode ter que fazer `O(N*M)` verificações de caracteres no pior caso.
+:::
+???
+
+---
+### Atividade de Código 3: Otimizando a Soma com Rolling Hash
+
+Como vimos na Atividade 2, recalcular o hash do zero é muito lento. Vamos aplicar a otimização de "rolling hash" da soma simples: `h(next) = h(curr) - out + in`.
+
+Isso nos leva ao nosso **primeiro algoritmo de busca O(N+M)**.
+
+```c
+#include <stdio.h>
+#include <string.h>
+
+// (função checar_match da atividade anterior)
+int checar_match(const char *txt, const char *pat, int start, int m) {
+    for (int j = 0; j < m; j++) {
+        if (txt[start + j] != pat[j]) { return 0; }
+    }
+    return 1;
+}
+
+int main(void) {
+    // Nosso exemplo de "spurious hits"
+    const char *texto = "adaabc"; 
+    const char *padrao = "bca";   
+    int n = strlen(texto);
+    int m = strlen(padrao);
+
+    // Funções de hash "inline" (sem 'a'+1 para simplificar, A=1, B=2...)
+    // Valores: a=1, b=2, c=3, d=4
+    
+    // 1. Calcula hash do padrão
+    int p_hash = ('b'-'a'+1) + ('c'-'a'+1) + ('a'-'a'+1); // 2 + 3 + 1 = 6
+    
+    // 2. Calcula hash da PRIMEIRA janela
+    int t_hash = (texto[0]-'a'+1) + (texto[1]-'a'+1) + (texto[2]-'a'+1); // 'ada' -> 1+4+1 = 6
+
+    printf("Hash do Padrão ('%s'): %d\n", padrao, p_hash);
+
+    // Loop principal O(N)
+    for (int i = 0; i <= n - m; i++) {
+        printf("Janela %d: '%.*s' -> Hash = %d\n", i, m, texto + i, t_hash);
+
+        // Compara
+        if (p_hash == t_hash) {
+            printf("  Hashes bateram! Verificando...\n");
+            if (checar_match(texto, padrao, i, m)) {
+                printf("  >> Match ENCONTRADO no índice %d\n", i);
+            } else {
+                printf("  >> Falso positivo!\n");
+            }
+        }
+
+        // 3. Atualiza o hash em O(1) para a PRÓXIMA janela
+        if (i < n - m) {
+            int outgoing = texto[i] - 'a' + 1;
+            int incoming = texto[i + m] - 'a' + 1;
+            t_hash = t_hash - outgoing + incoming;
+        }
+    }
+    return 0;
+}
+```
+
+??? Atividade 3: A Prova do Problema
+
+Compile e rode o código acima. O que a saída dele prova, em linha com o que vimos no "Exercício 6 - Identificando *spurious hits*"?
+
+::: Gabarito
+A saída será:
+Hash do Padrão ('bca'): 6 Janela 0: 'ada' -> Hash = 6 Hashes bateram! Verificando...
+
+Falso positivo! Janela 1: 'daa' -> Hash = 6 Hashes bateram! Verificando... Falso positivo! Janela 2: 'aab' -> Hash = 4 Janela 3: 'abc' -> Hash = 6 Hashes bateram! Verificando... Falso positivo!
+Isso prova em código o que vimos na teoria: o hash de soma simples **é rápido (O(N+M))**, mas gera *muitos falsos positivos* (`ada`, `daa`, `abc` todos têm hash 6), o que nos faz perder tempo com verificações desnecessárias.
+
+**Conclusão: Precisamos de um hash melhor.**
+:::
+???
 
 ---
 
-### Atividade de Código 1: O Hash Inicial (O(M))
+## Implementando o Rabin-Karp (A Versão Polinomial)
 
-Antes de deslizarmos, precisamos calcular o hash inicial do padrão (`p_hash`) e da primeira janela do texto (`t_hash`). Fazemos isso com um loop simples que aplica a fórmula polinomial (com módulo).
+Agora vamos implementar o algoritmo *real*, usando o **hash polinomial** (com potências) para reduzir drasticamente os *spurious hits*.
+
+A lógica de quebrar o código em atividades (Hash Inicial, Pré-cálculo, Loop Principal) que você já tem no seu arquivo é **perfeita**. Vamos apenas re-numerar as atividades para continuar a sequência.
+
+---
+
+### Atividade de Código 4: O Hash Polinomial Inicial
+
+Primeiro, vamos focar apenas em calcular o hash polinomial inicial (o `O(M)`) para o padrão e para a primeira janela do texto. Note a fórmula `hash = (d * hash + char_valor) % q`.
 
 ```c
 #include <stdio.h>
@@ -481,8 +680,8 @@ int main(void) {
     int n = strlen(text);
     int m = strlen(pattern);
 
-    const int d = 10;
-    const int q = 101;
+    const int d = 10;   // base
+    const int q = 101;  // número primo
 
     int p_hash = 0; // hash do padrão
     int t_hash = 0; // hash da janela do texto
@@ -493,17 +692,16 @@ int main(void) {
         t_hash = (d * t_hash + (text[i] - 'a' + 1)) % q;
     }
 
-    printf("Hash do padrão: %d\n", p_hash);
-    printf("Hash inicial da janela: %d\n", t_hash);
+    printf("Hash do padrão (%s): %d\n", pattern, p_hash);
+    printf("Hash inicial da janela (%.*s): %d\n", m, text, t_hash);
     
-    // ... resto do código ...
     return 0;
 }
 ```
 
-??? Atividade 1: Rastreando o Hash Inicial
+??? Atividade 4: Rastreando o Hash Polinomial
 
-Execute mentalmente o loop `for` acima. Quais serão os valores de `p_hash` e `t_hash` impressos no final?
+Execute mentalmente o loop `for` acima. Quais serão os valores de `p_hash` e `t_hash` impressos?
 
 *(Dica: `aab` -> `a=1, a=1, b=2` e `ada` -> `a=1, d=4, a=1`)*
 
@@ -512,22 +710,23 @@ Execute mentalmente o loop `for` acima. Quais serão os valores de `p_hash` e `t
 1. i=0: `p_hash = (10 * 0 + 1) % 101 = 1`
 2. i=1: `p_hash = (10 * 1 + 1) % 101 = 11`
 3. i=2: `p_hash = (10 * 11 + 2) % 101 = 112 % 101 = 11`
-Saída: `Hash do padrão: 11`
+Saída: `Hash do padrão (aab): 11`
 
 **t_hash ("ada"):**
 1. i=0: `t_hash = (10 * 0 + 1) % 101 = 1`
 2. i=1: `t_hash = (10 * 1 + 4) % 101 = 14`
 3. i=2: `t_hash = (10 * 14 + 1) % 101 = 141 % 101 = 40`
-Saída: `Hash inicial da janela: 40`
+Saída: `Hash inicial da janela (ada): 40`
 :::
 ???
 
 ---
-### Atividade de Código 2: O Pré-cálculo de $d^{M-1}$
+### Atividade de Código 5: O Pré-cálculo de $d^{M-1}$
 
-Para *remover* o caractere mais à esquerda (o $p_{out}$ da nossa fórmula), precisaremos subtrair seu valor multiplicado pelo seu 'peso' posicional, que é $d^{M-1}$.
+Para fazer o *rolling hash* polinomial, precisamos da fórmula:
+$h_{next} = \bigl( (h_{curr} - p_{out} \times \mathbf{d^{M-1}}) \times d + p_{in} \bigr) \bmod q$
 
-Para não recalcular $d^{M-1}$ (que seria $O(M)$) toda vez dentro do loop, pré-calculamos esse valor *antes* do loop principal. Vamos chamá-lo de `h`.
+Vamos pré-calcular o termo $\mathbf{d^{M-1} \bmod q}$. Vamos chamá-lo de `h`.
 
 ```c
     // ... (variáveis d, q, m) ...
@@ -543,14 +742,12 @@ Para não recalcular $d^{M-1}$ (que seria $O(M)$) toda vez dentro do loop, pré-
     // ... (cálculo do hash inicial) ...
 ```
 
-??? Atividade 2: Entendendo o `h`
+??? Atividade 5: Entendendo o `h`
 
-1. Por que o loop vai até `m-1` (e não `m`)?
-2. Qual o valor de `h` impresso para $d=10$, $m=3$, $q=101$?
+Qual o valor de `h` impresso para $d=10$, $m=3$, $q=101$?
 
 ::: Gabarito
-1. Porque queremos a potência $d^{M-1}$. Um loop de 0 até `m-2` (total de `m-1` iterações) calcula $d^{m-1}$.
-2. $d=10, m=3$. Queremos $10^{(3-1)} \bmod 101 = 10^2 \bmod 101 = 100 \bmod 101 = 100$.
+Queremos $10^{(3-1)} \bmod 101 = 10^2 \bmod 101 = 100$.
    * i=0: `h = (1 * 10) % 101 = 10`
    * i=1: `h = (10 * 10) % 101 = 100`
    Saída: `Valor de h (d^(m-1) % q): 100`
@@ -558,12 +755,9 @@ Para não recalcular $d^{M-1}$ (que seria $O(M)$) toda vez dentro do loop, pré-
 ???
 
 ---
-### Atividade de Código 3: O Loop Principal e o Rolling Hash
+### Atividade de Código 6: O Loop Principal Polinomial
 
-Agora, juntamos tudo. Vamos iterar pelo texto com um loop principal `(int i = 0; i <= n - m; i++)`. Em cada passo, faremos duas coisas:
-
-1.  **Comparar:** os hashes da janela atual (`p_hash == t_hash`). Se forem iguais, fazemos a verificação caractere-a-caractere para descartar *spurious hits*.
-2.  **Atualizar:** Calcular o hash da *próxima* janela (se não for a última) usando a fórmula do rolling hash em O(1).
+Agora, juntamos tudo: o hash inicial, o pré-cálculo de `h`, e o loop principal que usa a fórmula completa do *rolling hash* polinomial.
 
 ```c
     // ... (cálculo de h, p_hash, t_hash inicial) ...
@@ -573,16 +767,9 @@ Agora, juntamos tudo. Vamos iterar pelo texto com um loop principal `(int i = 0;
         
         // 1. Compara os hashes da janela atual
         if (p_hash == t_hash) {
-            // Potencial match! Verificar caractere por caractere
-            int match = 1;
-            for (int j = 0; j < m; j++) {
-                if (pattern[j] != text[i + j]) { 
-                    match = 0; 
-                    break; 
-                }
-            }
-            if (match)
-                printf(">> Match encontrado no índice %d ✅\n", i);
+            // (verificação caractere-a-caractere...)
+            // Vamos assumir que a verificação acontece aqui
+            printf(">> Potencial Match no índice %d\n", i);
         }
 
         // 2. Calcula o hash da PRÓXIMA janela (se não for a última)
@@ -600,12 +787,12 @@ Agora, juntamos tudo. Vamos iterar pelo texto com um loop principal `(int i = 0;
     }
 ```
 
-??? Atividade 3: Reflexão sobre o Módulo
+??? Atividade 6: Reflexão sobre o Módulo
 
-Por que precisamos da linha `if (t_hash < 0) t_hash += q;`? O que aconteceria em C se `(t_hash - outgoing * h)` fosse negativo e aplicássemos `% q`?
+Por que precisamos da linha `if (t_hash < 0) t_hash += q;`?
 
 ::: Gabarito
-O operador `%` em C não é um operador de *módulo* matemático, mas sim de *resto*. 
+O operador `%` em C não é um operador de *módulo* matemático, but sim de *resto*. 
 
 Se a entrada for negativa (ex: `-7 % 5`), o resultado em C é `-2`, não `3`. Queremos que nossos hashes estejam sempre no intervalo `[0, q-1]`.
 
@@ -614,13 +801,21 @@ Adicionar `q` (ex: `-2 + 5 = 3`) corrige isso e "dá a volta" no círculo do mó
 ???
 
 ---
-### O Código Completo
+### O Código Completo do Rabin-Karp
 
-Juntando todos os blocos, temos o programa completo:
+Juntando todos os blocos (Atividades 4, 5 e 6), temos o programa completo:
 
 ``` c
 #include <stdio.h>
 #include <string.h>
+
+// (função checar_match)
+int checar_match(const char *txt, const char *pat, int start, int m) {
+    for (int j = 0; j < m; j++) {
+        if (txt[start + j] != pat[j]) { return 0; }
+    }
+    return 1;
+}
 
 int main(void) {
     const char *text = "adaabc";    // texto
@@ -628,15 +823,15 @@ int main(void) {
     int n = strlen(text);
     int m = strlen(pattern);
 
-    const int d = 10;   // base (exemplo simples)
-    const int q = 101;  // número primo para módulo
+    const int d = 10;   // base
+    const int q = 101;  // número primo
 
-    // --- Bloco 2: Pré-cálculo de h ---
+    // --- Atividade 5: Pré-cálculo de h ---
     int h = 1; // d^(m-1) % q
     for (int i = 0; i < m - 1; i++)
         h = (h * d) % q;
 
-    // --- Bloco 1: Hash Inicial ---
+    // --- Atividade 4: Hash Inicial ---
     int p_hash = 0; // hash do padrão
     int t_hash = 0; // hash da janela do texto
     for (int i = 0; i < m; i++) {
@@ -644,21 +839,21 @@ int main(void) {
         t_hash = (d * t_hash + (text[i] - 'a' + 1)) % q;
     }
 
-    printf("Hash do padrão: %d\n", p_hash);
-    printf("Hash inicial da janela: %d\n", t_hash);
+    printf("Hash do Padrão ('%s'): %d\n", pattern, p_hash);
+    printf("Valor de h: %d\n", h);
 
-    // --- Bloco 3: Loop Principal ---
+    // --- Atividade 6: Loop Principal ---
     for (int i = 0; i <= n - m; i++) {
-        printf("Janela %d: %.*s → Hash = %d\n", i, m, text + i, t_hash);
+        printf("Janela %d: '%.*s' → Hash = %d\n", i, m, text + i, t_hash);
 
         // 1. Compara
         if (p_hash == t_hash) {
-            int match = 1;
-            for (int j = 0; j < m; j++) {
-                if (pattern[j] != text[i + j]) { match = 0; break; }
+            printf("  Hashes bateram! Verificando...\n");
+            if (checar_match(texto, pattern, i, m)) {
+                printf("  >> Match ENCONTRADO no índice %d ✅\n", i);
+            } else {
+                printf("  >> Falso positivo! ❌\n");
             }
-            if (match)
-                printf(">> Match encontrado no índice %d ✅\n", i);
         }
 
         // 2. Atualiza (Rolling Hash)
@@ -677,10 +872,39 @@ int main(void) {
 
 ## Conclusão
 
-Essa é a essência do **Rabin-Karp**:  
-usar **hashes polinomiais** para reduzir colisões e **rolling hash** para atualizar o hash da janela em O(1).  
+Essa é a essência do **Rabin-Karp**:
+usar **hashes polinomiais** para reduzir colisões e **rolling hash** para atualizar o hash da janela em O(1).
 O resultado é uma busca eficiente com complexidade média **O(N + M)**, que é muito mais rápida que a força bruta O(N*M).
 
+---
+
+### Escolhendo a Base $d$ e o Módulo $q$
+
+A base $d$ define **quantos símbolos diferentes** o algoritmo pode representar. Ela funciona como o “tamanho do alfabeto”. O módulo $q$ deve ser um número primo grande para minimizar colisões.
+
+| Tipo de texto | Base $d$ sugerida | Explicação |
+|----------------|----------------------|-------------|
+| Letras minúsculas (a–z) | 26 | Um valor para cada letra do alfabeto. |
+| Letras maiúsculas e minúsculas | 52 | Diferencia maiúsculas e minúsculas. |
+| Texto ASCII (ex: frases, código) | 256 | Cobre todos os caracteres ASCII. |
+| DNA (A, C, G, T) | 4 | Apenas 4 caracteres possíveis. |
+
+No código real, é comum usar **d = 256** (para cobrir todo o ASCII) e um **$q$ primo e grande** (ex: 101, 997, ou um primo na ordem de $10^9$).
+
+---
+
+??? Exercício Final — Escolhendo os parâmetros
+
+1. Se o texto usa apenas letras minúsculas (a–z), qual base $d$ é suficiente?
+2. E se o texto usa letras, números e pontuação (ex: "Olá, Mundo!")?
+3. Qual é a vantagem de usar um módulo $q$ primo e grande?
+
+::: Gabarito
+1. $d = 26$
+2. $d = 256$ — cobre todos os caracteres ASCII.
+3. O módulo $q$ impede que o valor do hash cresça demais (evitando *overflow* de inteiros). Ser primo e grande **reduz drasticamente a chance de colisões** (*spurious hits*), tornando o algoritmo mais eficiente.
+:::
+???
 ---
 
 ### Escolhendo a Base \(d\) no Rabin–Karp
