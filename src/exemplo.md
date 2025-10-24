@@ -38,25 +38,34 @@ uma posição de cada vez, e comparar caractere por caractere.
 
 Vamos ver isso em ação com nosso exemplo. O **padrão** é "roupa" (tamanho 5).
 
-// montar a sequencia de imagens para a força bruta!! 
-algo seguindo essa sequencia:
-Tentativa 1 (Índice 0): Texto: [o r a t o] roeu a roupa... Padrão: [r o u p a] Compara 1: 'o' == 'r'? Falha. (1 comparação)
+Tentativa 1 (Índice 0):
+Texto: `[o r a t o]` roeu a roupa...
+Padrão: `[r o u p a]`
+Compara 1: 'o' == 'r'? **Falha.** (1 comparação)
 
-Tentativa 2 (Índice 1): Texto: o[ r a t o] roeu a roupa... Padrão: [r o u p a] Compara 1: ' ' == 'r'? Falha. (1 comparação)
+Tentativa 2 (Índice 1):
+Texto: o`[ r a t o ]`roeu a roupa...
+Padrão: `[r o u p a]`
+Compara 1: ' ' == 'r'? **Falha.** (1 comparação)
 
-Tentativa 3 (Índice 2): Texto: o [r a t o ] roeu a roupa... Padrão: [r o u p a] Compara 1: 'r' == 'r'? Ok. Compara 2: 'a' == 'o'? Falha. (2 comparações)
+Tentativa 3 (Índice 2):
+Texto: o `[r a t o ]` roeu a roupa...
+Padrão: `[r o u p a]`
+Compara 1: 'r' == 'r'? Ok.
+Compara 2: 'a' == 'o'? **Falha.** (2 comparações)
 
-PULANDO VARIAS TENTATIVAS:
+... (várias tentativas depois) ...
 
-Tentativa 15 (Índice 14): Texto: o rato roeu a[r o u p a] do reide... Padrão: [r o u p a]
-
+Tentativa 15 (Índice 14):
+Texto: o rato roeu a`[r o u p a]` do reide...
+Padrão: `[r o u p a]`
 Compara 1: 'r' == 'r'? Ok. 
 Compara 2: 'o' == 'o'? Ok. 
 Compara 3: 'u' == 'u'? Ok. 
 Compara 4: 'p' == 'p'? Ok. 
 Compara 5: 'a' == 'a'? Ok. 
 
-Match! Retorna o índice 14. (5 comparações)
+**Match!** Retorna o índice 14. (5 comparações)
 
 
 ??? Checkpoint
@@ -74,7 +83,44 @@ Isso nos dá uma complexidade de O((n−m+1)×m), que simplificamos para O(n×m)
 :::
 ???
 
+Aqui está um exemplo de código que representa essa complexidade O(N\*M) no cálculo de um hash.
 
+```c
+#include <stdio.h>
+#include <string.h>
+
+// Função de busca por força bruta
+void busca_forca_bruta(const char *texto, const char *padrao) {
+    int n = strlen(texto);
+    int m = strlen(padrao);
+
+    // Loop externo: desliza a janela pelo texto
+    // Roda (N - M + 1) vezes. Complexidade O(N).
+    for (int i = 0; i <= n - m; i++) {
+        
+        int match = 1; // Assume que é um match
+        
+        // Loop interno: compara cada caractere da janela com o padrão
+        // Roda M vezes. Complexidade O(M).
+        for (int j = 0; j < m; j++) {
+            if (texto[i + j] != padrao[j]) {
+                match = 0; // Não é um match
+                break;     // Para o loop interno
+            }
+        }
+        
+        if (match) {
+            printf("Padrão encontrado no índice %d\n", i);
+        }
+    }
+    // Complexidade Total = O(N) * O(M) = O(N*M)
+}
+
+int main(void) {
+    busca_forca_bruta("o rato roeu a roupa do reide roma", "roupa");
+    return 0;
+}
+```
 ??? Checkpoint
 
 Imagine um cenário real, como um sistema de verificação de plágio.
@@ -136,8 +182,8 @@ Assim, o algoritmo pode comparar números em vez de letras, tornando a busca mui
 Por exemplo, se atribuirmos ` A = 1` e ` B = 2`, o padrão ` A A B` pode ser representado por um hash que é...
 
 ::: Gabarito
-``` 
-A A B = 1 + 1 + 2 = 4 
+```
+A A B = 1 + 1 + 2 = 4
 ```
 :::
 ???
@@ -149,9 +195,9 @@ Agora, calcule o hash dos **3 primeiros caracteres** do texto ` A A A`:
 Qual é o valor do hash desse trecho?
 
 ::: Gabarito
-``` 
+```
 A A A = 1 + 1 + 1 = 3
-``` 
+```
 :::
 ???
 
@@ -218,29 +264,24 @@ Se os números são diferentes, ele já sabe que o trecho não combina — sem p
 O algoritmo encontrou **apenas um resultado correto** e **nenhum falso positivo**.  
 Ou seja, ele percorreu o texto comparando apenas os valores de hash, sem precisar verificar caractere por caractere.
 
-**Pergunta:**  
-Qual é a complexidade desse caso?  
+**Pergunta:** Qual é a complexidade desse caso?  
 Explique o motivo.
 
 ::: Gabarito
 Quando não há falsos positivos, o algoritmo realiza apenas as comparações de hash,  
-percorrendo o texto uma vez e calculando o hash do padrão.
+percorrendo o texto uma vez (O(N)) e calculando o hash do padrão (O(M)).
 
-Complexidade: **O(N + M)**  
-*(onde N é o tamanho do texto e M o tamanho do padrão)*
-
-O algoritmo é rápido, pois não precisa fazer verificações adicionais.
+Complexidade: **O(N + M)** O algoritmo é rápido, pois não precisa fazer verificações adicionais caractere a caractere.
 :::
 ???
-
 ---
 ## Problema dos *Spurious Hits* (falsos positivos)
 
-Mesmo com o uso de hashing, ainda podem ocorrer **falsos positivos**, chamados de *spurious hits*.  
-Isso acontece quando **dois trechos diferentes** do texto produzem o **mesmo valor de hash**, mesmo que os caracteres não sejam iguais.
+Otimizar o recálculo para O(1) é ótimo, mas nossa função de hash (soma simples) ainda tem um problema grave.
 
-Quando isso ocorre, o algoritmo precisa verificar caractere por caractere para confirmar se o padrão realmente aparece ali.  
-Esses casos aumentam o custo da busca, podendo levar à complexidade **O(N·M)**.
+**Falsos positivos** (ou *spurious hits*) acontecem quando **dois trechos diferentes** produzem o **mesmo valor de hash**, mesmo que os caracteres não sejam iguais.
+
+Quando isso ocorre, o algoritmo compara o hash (que bate!) e é forçado a verificar caractere por caractere, apenas para descobrir que era um alarme falso. Esses casos aumentam o custo da busca, podendo levar à complexidade **O(N·M)** no pior caso (imagine um texto `AAAAA` e um padrão `B`).
 
 ---
 
@@ -259,9 +300,6 @@ Esses casos aumentam o custo da busca, podendo levar à complexidade **O(N·M)**
 | Padrão | B | C | A |
 
 Suponha valores ` A=1, B=2, C=3, D=4` e função hash = soma dos valores.
-
-
-**Exemplo ilustrativo:**
 
 ---
 
@@ -301,8 +339,7 @@ mas nenhum deles corresponde realmente ao padrão - são *spurious hits*.
 Alguns trechos diferentes do texto geraram **o mesmo valor de hash** do padrão,  
 mas ao comparar os caracteres, o algoritmo percebeu que **não eram correspondências reais** (*spurious hits*).
 
-**Pergunta:**  
-Como isso afeta a complexidade do algoritmo?  
+**Pergunta:** Como isso afeta a complexidade do algoritmo?  
 Explique se ele se torna mais lento nesse caso.
 
 ::: Gabarito
@@ -345,7 +382,7 @@ $$h(p) = \sum_{i=0}^{M-1} p_i \times d^{M-1-i}$$
 
 Até agora, usamos a soma simples (ex: 1 + 1 + 2).  
 Mas o **Rabin-Karp** trata a string como um número em uma **base**,  
-onde cada posição tem um peso diferente (10⁰, 10¹, 10²…).
+onde cada posição tem um peso diferente ($d^0, d^1, d^2$…).
 
 Assim, strings diferentes raramente terão o mesmo hash —  
 reduzindo o risco de **falsos positivos**.
@@ -396,12 +433,13 @@ Vamos comparar os dois padrões com $d=10$:
 
 ## Implementando o Rolling Hash
 
-Para evitar recalcular a soma inteira a cada passo, usa-se um **rolling hash**: 
-a partir do hash do trecho atual, subtrai-se o valor do caractere que saiu e adiciona-se o valor do caractere que entrou. Assim o custo por deslocamento fica O(1) (em vez de O(M)). É a ideia básica por trás do **algoritmo de Rabin-Karp**.
+O problema do hash polinomial é que, ingenuamente, ele também parece ser O(M) para calcular em cada janela (como no Exercício 9). Se fizermos isso, voltamos à complexidade O(N\*M).
 
+Para evitar recalcular a soma inteira a cada passo, usa-se um **rolling hash**: 
+a partir do hash do trecho atual, subtrai-se o valor do caractere que saiu e adiciona-se o valor do caractere que entrou. Assim o custo por deslocamento fica O(1) (em vez de O(M)).
 
 ---
-### Aplicando a Janela Deslizante (Rolling Hash)
+## Aplicando a Janela Deslizante (Rolling Hash)
 
 A ideia do rolling hash é atualizar o hash da janela atual sem recalcular do zero. Usamos a representação posicional do hash (base d) e, na implementação prática, normalmente aplicamos um módulo primo $q$ para evitar *overflow* (números gigantes).
 
@@ -449,7 +487,7 @@ Valores: `a=1`, `b=2`, `c=3`, `d=4`, base $d=10$, $M=3$
     * $h_2 = (h_1 - p_{out} \times d^{M-1}) \times d + p_{in}$
     * $h_2 = (411 - 4 \times 10^2) \times 10 + 2$
     * $h_2 = (411 - 400) \times 10 + 2 = 11 \times 10 + 2 = 112$
-4. *Match* encontrado! $h_2$ (112) == $h(padrão)$ (112). A janela começa no índice **3**. ✅
+4. *Match* encontrado! $h_2$ (112) == $h(padrão)$ (112). A janela começa no índice **3**.
 :::
 ???
 
@@ -463,7 +501,7 @@ Para todos os exemplos, vamos assumir:
 `A=1`, `B=2`, `C=3`, etc. (faremos `char - 'a' + 1`)
 
 ---
-### Atividade de Código 1: O Hash de Soma Simples
+## Atividade de Código 1: O Hash de Soma Simples
 
 Primeiro, vamos apenas criar uma função em C que implementa a nossa primeira ideia de hash: a soma simples dos valores dos caracteres (como no Exercício 1).
 
@@ -501,12 +539,14 @@ Qual será a saída do programa acima?
 O programa irá calcular `('a'-'a'+1) + ('a'-'a'+1) + ('b'-'a'+1)`, que é `1 + 1 + 2`.
 
 A saída será:
+```
 Padrão: aab Hash (soma): 4
+```
 :::
 ???
 
 ---
-### Atividade de Código 2: Algoritmo de Busca com Hash de Soma
+## Atividade de Código 2: Algoritmo de Busca com Hash de Soma
 
 Agora, vamos usar essa função de hash para construir um algoritmo de busca. Esta será nossa primeira versão "ingênua":
 
@@ -580,7 +620,7 @@ Ele não é melhor que a força bruta. Na verdade, ele é *pior*, pois faz `O(N*
 ???
 
 ---
-### Atividade de Código 3: Otimizando a Soma com Rolling Hash
+## Atividade de Código 3: Otimizando a Soma com Rolling Hash
 
 Como vimos na Atividade 2, recalcular o hash do zero é muito lento. Vamos aplicar a otimização de "rolling hash" da soma simples: `h(next) = h(curr) - out + in`.
 
@@ -624,9 +664,9 @@ int main(void) {
         if (p_hash == t_hash) {
             printf("  Hashes bateram! Verificando...\n");
             if (checar_match(texto, padrao, i, m)) {
-                printf("  >> Match ENCONTRADO no índice %d\n", i);
+                printf("  >> Match ENCONTRADO no índice %d ✅\n", i);
             } else {
-                printf("  >> Falso positivo!\n");
+                printf("  >> Falso positivo! ❌\n");
             }
         }
 
@@ -640,16 +680,17 @@ int main(void) {
     return 0;
 }
 ```
-
 ??? Atividade 3: A Prova do Problema
 
 Compile e rode o código acima. O que a saída dele prova, em linha com o que vimos no "Exercício 6 - Identificando *spurious hits*"?
 
 ::: Gabarito
 A saída será:
+```
 Hash do Padrão ('bca'): 6 Janela 0: 'ada' -> Hash = 6 Hashes bateram! Verificando...
 
-Falso positivo! Janela 1: 'daa' -> Hash = 6 Hashes bateram! Verificando... Falso positivo! Janela 2: 'aab' -> Hash = 4 Janela 3: 'abc' -> Hash = 6 Hashes bateram! Verificando... Falso positivo!
+        Falso positivo! ❌ Janela 1: 'daa' -> Hash = 6 Hashes bateram! Verificando... Falso positivo! ❌ Janela 2: 'aab' -> Hash = 4 Janela 3: 'abc' -> Hash = 6 Hashes bateram! Verificando... Falso positivo! ❌
+```
 Isso prova em código o que vimos na teoria: o hash de soma simples **é rápido (O(N+M))**, mas gera *muitos falsos positivos* (`ada`, `daa`, `abc` todos têm hash 6), o que nos faz perder tempo com verificações desnecessárias.
 
 **Conclusão: Precisamos de um hash melhor.**
@@ -662,11 +703,9 @@ Isso prova em código o que vimos na teoria: o hash de soma simples **é rápido
 
 Agora vamos implementar o algoritmo *real*, usando o **hash polinomial** (com potências) para reduzir drasticamente os *spurious hits*.
 
-A lógica de quebrar o código em atividades (Hash Inicial, Pré-cálculo, Loop Principal) que você já tem no seu arquivo é **perfeita**. Vamos apenas re-numerar as atividades para continuar a sequência.
-
 ---
 
-### Atividade de Código 4: O Hash Polinomial Inicial
+## Atividade de Código 4: O Hash Polinomial Inicial
 
 Primeiro, vamos focar apenas em calcular o hash polinomial inicial (o `O(M)`) para o padrão e para a primeira janela do texto. Note a fórmula `hash = (d * hash + char_valor) % q`.
 
@@ -698,7 +737,6 @@ int main(void) {
     return 0;
 }
 ```
-
 ??? Atividade 4: Rastreando o Hash Polinomial
 
 Execute mentalmente o loop `for` acima. Quais serão os valores de `p_hash` e `t_hash` impressos?
@@ -721,7 +759,7 @@ Saída: `Hash inicial da janela (ada): 40`
 ???
 
 ---
-### Atividade de Código 5: O Pré-cálculo de $d^{M-1}$
+## Atividade de Código 5: O Pré-cálculo de $d^{M-1}$
 
 Para fazer o *rolling hash* polinomial, precisamos da fórmula:
 $h_{next} = \bigl( (h_{curr} - p_{out} \times \mathbf{d^{M-1}}) \times d + p_{in} \bigr) \bmod q$
@@ -741,7 +779,6 @@ Vamos pré-calcular o termo $\mathbf{d^{M-1} \bmod q}$. Vamos chamá-lo de `h`.
 
     // ... (cálculo do hash inicial) ...
 ```
-
 ??? Atividade 5: Entendendo o `h`
 
 Qual o valor de `h` impresso para $d=10$, $m=3$, $q=101$?
@@ -755,7 +792,7 @@ Queremos $10^{(3-1)} \bmod 101 = 10^2 \bmod 101 = 100$.
 ???
 
 ---
-### Atividade de Código 6: O Loop Principal Polinomial
+## Atividade de Código 6: O Loop Principal Polinomial
 
 Agora, juntamos tudo: o hash inicial, o pré-cálculo de `h`, e o loop principal que usa a fórmula completa do *rolling hash* polinomial.
 
@@ -786,13 +823,12 @@ Agora, juntamos tudo: o hash inicial, o pré-cálculo de `h`, e o loop principal
         }
     }
 ```
-
 ??? Atividade 6: Reflexão sobre o Módulo
 
 Por que precisamos da linha `if (t_hash < 0) t_hash += q;`?
 
 ::: Gabarito
-O operador `%` em C não é um operador de *módulo* matemático, but sim de *resto*. 
+O operador `%` em C não é um operador de *módulo* matemático, mas sim de *resto*. 
 
 Se a entrada for negativa (ex: `-7 % 5`), o resultado em C é `-2`, não `3`. Queremos que nossos hashes estejam sempre no intervalo `[0, q-1]`.
 
@@ -801,7 +837,7 @@ Adicionar `q` (ex: `-2 + 5 = 3`) corrige isso e "dá a volta" no círculo do mó
 ???
 
 ---
-### O Código Completo do Rabin-Karp
+## O Código Completo do Rabin-Karp
 
 Juntando todos os blocos (Atividades 4, 5 e 6), temos o programa completo:
 
@@ -869,7 +905,6 @@ int main(void) {
     return 0;
 }
 ```
-
 ## Conclusão
 
 Essa é a essência do **Rabin-Karp**:
@@ -878,7 +913,7 @@ O resultado é uma busca eficiente com complexidade média **O(N + M)**, que é 
 
 ---
 
-### Escolhendo a Base $d$ e o Módulo $q$
+## Escolhendo a Base $d$ e o Módulo $q$
 
 A base $d$ define **quantos símbolos diferentes** o algoritmo pode representar. Ela funciona como o “tamanho do alfabeto”. O módulo $q$ deve ser um número primo grande para minimizar colisões.
 
@@ -905,117 +940,6 @@ No código real, é comum usar **d = 256** (para cobrir todo o ASCII) e um **$q$
 3. O módulo $q$ impede que o valor do hash cresça demais (evitando *overflow* de inteiros). Ser primo e grande **reduz drasticamente a chance de colisões** (*spurious hits*), tornando o algoritmo mais eficiente.
 :::
 ???
----
-
-### Escolhendo a Base \(d\) no Rabin–Karp
-
-A base \(d\) define **quantos símbolos diferentes** o algoritmo pode representar.  
-Ela funciona como o “tamanho do alfabeto” — ou seja, o número de caracteres possíveis no texto.
-
-| Tipo de texto | Base \(d\) mais comum | Explicação |
-|----------------|----------------------|-------------|
-| Letras minúsculas (a–z) | 26 | Um valor para cada letra do alfabeto. |
-| Letras maiúsculas e minúsculas (a–z, A–Z) | 52 | Diferencia maiúsculas e minúsculas. |
-| Texto ASCII (ex: frases, código) | 256 | Cobre todos os caracteres ASCII. |
-| Texto binário (0 e 1) | 2 | Cada caractere é um bit. |
-
-No código real, é comum usar **d = 256**, pois isso cobre todos os caracteres possíveis da tabela ASCII.
-
-O cálculo completo do hash fica:
-\[
-h(p) = \left( \sum_{i=0}^{M-1} p_i \times d^{M-1-i} \right) \bmod q
-\]
-
-O módulo \(q\) é um **número primo grande** (ex: 101, 997, 1009...) usado para evitar *overflow* e reduzir colisões.
-
----
-
-??? Exercício — Escolhendo a base
-
-1. Se o texto usa apenas letras minúsculas (a–z), qual base \(d\) é suficiente?  
-2. E se o texto usa letras, números e pontuação (ex: "Olá, Mundo!")?  
-3. Qual é a vantagem de usar o módulo \(q\)?
-
-::: Gabarito
-1. \(d = 26\)  
-2. \(d = 256\) — cobre todos os caracteres ASCII.  
-3. O módulo \(q\) impede que o valor do hash cresça demais e **reduz colisões**,  
-   mantendo os resultados em um intervalo controlado.
-:::
-???
-
-
-
-| Tipo de texto                                             | Base (d) mais comum | Explicação                                             |
-| --------------------------------------------------------- | ------------------- | ------------------------------------------------------ |
-| **Texto com letras minúsculas (a–z)**                     | 26                  | Uma posição para cada letra do alfabeto.               |
-| **Texto com letras maiúsculas e minúsculas (a–z, A–Z)**   | 52                  | Considera as letras maiúsculas e minúsculas distintas. |
-| **Texto com caracteres ASCII (ex: código-fonte, frases)** | 256                 | Considera todos os caracteres ASCII possíveis.         |
-| **Texto binário (0 e 1)**                                 | 2                   | Cada caractere é um bit.                               |
-
-
-Você também pode criar
-
-1. listas;
-
-2. ordenadas,
-
-assim como
-
-* listas;
-
-* não-ordenadas
-
-![](hash1.png)
-
-Para tabelas, usa-se a [notação do
-MultiMarkdown](https://fletcher.github.io/MultiMarkdown-6/syntax/tables.html),
-que é muito flexível. Vale a pena abrir esse link para saber todas as
-possibilidades.
-
-| coluna a | coluna b | 
-|----------|----------|
-| 1        | 2        |
-
-Ao longo de um texto, você pode usar *itálico*, **negrito**, {red}(vermelho) e
-[[tecla]]. Também pode usar uma equação LaTeX: $f(n) \leq g(n)$. Se for muito
-grande, você pode isolá-la em um parágrafo.
-
-$$\lim_{n \rightarrow \infty} \frac{f(n)}{g(n)} \leq 1$$
-
-Para inserir uma animação, use `md :` seguido do nome de uma pasta onde as
-imagens estão. Essa pasta também deve estar em *img*.
-
-:bubble
-
-Você também pode inserir código, inclusive especificando a linguagem.
-
-``` py
-def f():
-    print('hello world')
-```
-
-``` c
-void f() {
-    printf("hello world\n");
-}
-```
-
-Se não especificar nenhuma, o código fica com colorização de terminal.
-
-```
-hello world
-```
-
-
-!!! Aviso
-Este é um exemplo de aviso, entre `md !!!`.
-!!!
-
-
-
-
-
 
 Enzo Ristori​
 
