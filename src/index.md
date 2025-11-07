@@ -135,16 +135,14 @@ Calcule o hash de cada trecho de tamanho M = 3 e compare com o hash do padrão (
 | 3–5 | C A B | ? | ? |
 
 ::: Gabarito
-| Posição | Trecho | h(t) | Igual ao h(p ) ? |
-|:---|:---|:---|:---|
-| 0–2 | A B D | 7 | ❌ |
-| 1–3 | B D C | 9 | ❌ |
-| 2–4 | D C A | 8 | ❌ |
-| 3–5 | C A B | 6 | ✅ |
+
+:hash_opt
 
 ✅ O padrão foi encontrado na posição **3** do texto.
+
 :::
 ???
+
 ---
 ## O Problema do Hash Simples: *Spurious Hits* (Falsos Positivos)
 
@@ -205,7 +203,7 @@ Os trechos **"A D A"**, **"D A A"** e **"A B C"** têm hash **6**, igual ao do p
 
 Para resolver o problema das colisões, precisamos de uma função de hash que considere a **posição** dos caracteres.
 
-O **Rabin-Karp** faz isso tratando a string como um número em uma **base**, onde cada posição tem um peso diferente ($10^{m-1}, 10^{m-2},… 10^0$). Assim, `BCA` terá um hash diferente de `ABC`. Isso reduz drasticamente a chance de colisões, tornando-as muito raras.
+O **Rabin-Karp** faz isso tratando a string como um número em uma **base**, onde cada posição tem um peso diferente ($10^{m-1}, 10^{m-2},… 10^0$). Assim, ` B C A` terá um hash diferente de ` A B C`. Isso reduz drasticamente a chance de colisões, tornando-as muito raras.
 
 ---
 ??? Exercício 5 — Resolvendo os Falsos Positivos
@@ -214,7 +212,7 @@ O **Rabin-Karp** faz isso tratando a string como um número em uma **base**, ond
 
 Use a fórmula:
 
-$h(\text{trecho}) = p_0\times10^2 + p_1\times10^1 + p_2\times10^0$
+$$h(\text{trecho}) = p_0\times10^2 + p_1\times10^1 + p_2\times10^0$$
 
 1.  Calcule o **hash do padrão** `~ B C A`.
 2.  Calcule o hash dos trechos que antes deram o mesmo valor (6).
@@ -239,7 +237,7 @@ $h(\text{trecho}) = p_0\times10^2 + p_1\times10^1 + p_2\times10^0$
 
 ??? Checkpoint: O Passo Final e Obrigatório
 
-O hash polinomial torna as colisões muito raras, mas **não impossíveis**. Por exemplo, com um alfabeto maior, as strings `BAA` e `AKA` poderiam gerar o mesmo hash.
+O hash polinomial torna as colisões muito raras, mas **não impossíveis**. Por exemplo, com um alfabeto maior, as strings `~B A A` e `~A K A` poderiam gerar o mesmo hash.
 
 **Pergunta:** Digamos que, ao percorrer o texto, você encontra um trecho cujo hash polinomial é **idêntico** ao hash do padrão. O que o algoritmo deve fazer para ter 100% de certeza de que encontrou o padrão?
 
@@ -262,11 +260,11 @@ O hash polinomial é ótimo, mas temos um novo problema.
 
 1.  Por que usar potências ajuda a evitar colisões?
 2.  Qual é a complexidade de calcular o hash polinomial do zero para **uma** janela de tamanho **M**?
-3.  Se fizermos isso para **todas** as `N-M+1` janelas, qual será a complexidade total do algoritmo?
+3.  Se fizermos isso para **todas** as `~N-M+1` janelas, qual será a complexidade total do algoritmo?
 
 ::: Gabarito
 
-1.  Usar potências faz com que **a posição de cada caractere influencie o resultado**. Diferente da soma, a ordem agora importa: `ABC` (123) ≠ `BCA` (231).
+1.  Usar potências faz com que **a posição de cada caractere influencie o resultado**. Diferente da soma, a ordem agora importa: `~A B C` (123) ≠ `~B C A` (231).
 
 2.  O cálculo direto do hash tem complexidade **O(M)**, pois percorre cada caractere uma vez para aplicar a fórmula.
 
@@ -287,23 +285,24 @@ A lógica é:
 3.  **"Desloque"** o resto do valor para a esquerda (multiplicando pela base).
 4.  **Adicione** a contribuição do novo caractere que está entrando (o mais à direita).
 
-Fórmula: $h_{next} = (h_{curr} - p_{out} \times 10^{M-1}) \times 10 + p_{in}$
+**Fórmula:** $h_{next} = (h_{curr} - p_{out} \times 10^{M-1}) \times 10 + p_{in}$
 !!!
 ---
 
 ??? Exercício 7 – Acompanhe o Rolling Hash
 
-**Texto:** `~ A D A A B C`
-**Padrão:** `~ A A B`
-**Valores:** `~ A=1`, `~ B=2`, `~ C=3`, `~ D=4`, base $d=10$, $M=3$
+**Texto:** `~A D A A B C`
+**Padrão:** `~A A B`
+**Valores:** `~A = 1`, `~B = 2`, `~C = 3`, `~D = 4`, base $d=10$, $M=3$
 
-1.  Calcule o hash do **padrão** `~ A A B`.
+1.  Calcule o hash do **padrão** `~A A B`.
 2.  Calcule o hash da primeira janela (`~A D A`).
 3.  Aplique a fórmula do *rolling hash* para encontrar o valor das janelas seguintes até encontrar o padrão.
-    -   `~ A D A` → `~ D A A`
-    -   `~ D A A` → `~ A A B`
+    -   `~A D A` → `~D A A`
+    -   `~D A A` → `~A A B`
 
 ::: Gabarito
+
 1.  $h(padrão)=(1 \times 10^2)+(1 \times 10^1)+(2 \times 10^0)=112$
 2.  
     *   **Janela 1 (A D A):**
@@ -330,16 +329,13 @@ Agora que temos o algoritmo completo e eficiente, vamos analisar seu custo.
 
 **Pergunta 1:** Qual é a complexidade do Rabin-Karp no **melhor caso** (poucos ou nenhum falso positivo)?
 
+**Pergunta 2:** Qual é a complexidade no **pior caso** (uma função de hash ruim que gera falsos positivos em todas as janelas)?
+
 ::: Gabarito
+
 O algoritmo calcula o hash inicial em $O(M)$ e depois faz $N-M$ atualizações de $O(1)$.
-
 Complexidade: **$O(N + M)$**. O algoritmo é extremamente rápido.
-:::
-???
 
-??? **Pergunta 2:** Qual é a complexidade no **pior caso** (uma função de hash ruim que gera falsos positivos em todas as janelas)?
-
-::: Gabarito
 Quando ocorrem falsos positivos, o algoritmo precisa **comparar caractere por caractere** ($O(M)$) em cada posição onde o hash é igual. Se isso acontecer em todas as $N$ janelas, o custo volta a ser o da força bruta.
 
 Complexidade: **$O(N·M)$**.
