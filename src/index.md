@@ -174,6 +174,7 @@ Esta técnica de atualização em $O(1)$ é o "pulo do gato" que nos permite des
 
 ---
 
+:hash_opt
 
 ??? Exercício 4 – Reflexão
 
