@@ -1,10 +1,7 @@
 Algoritmo de Rabin-Karp 
 ======
 
-Algoritmo Busca em Texto
----------
-
-## O Problema da Busca
+## O Problema da Busca em Texto
 
 Vamos começar definindo o problema: 
 * Temos um Texto (uma longa sequência de caracteres).
@@ -109,10 +106,10 @@ A ideia mais basica de um hash é transformar o padrão em um número, somando o
 
 Assim, o algoritmo pode comparar números em vez de letras, tornando a busca muito mais rápida.
 
-Por exemplo, se atribuirmos ` A = 1` e ` B = 2`, o padrão ` A A B` pode ser representado por um hash que é...
+Por exemplo, se atribuirmos `~ A = 1` e `~ B = 2`, o padrão `~ A A B` pode ser representado por um hash que é...
 
 ::: Gabarito
-```
+```~
 A A B = 1 + 1 + 2 = 4
 ```
 :::
@@ -121,11 +118,11 @@ A A B = 1 + 1 + 2 = 4
 
 ??? Exercício 2 – Hash do Primeiro Trecho do Texto
 
-Agora, calcule o hash dos **3 primeiros caracteres** do texto ` A A A`:
+Agora, calcule o hash dos **3 primeiros caracteres** do texto `~ A A A`:
 Qual é o valor do hash desse trecho?
 
 ::: Gabarito
-```
+```~
 A A A = 1 + 1 + 1 = 3
 ```
 :::
@@ -159,15 +156,15 @@ Calcule o hash de cada trecho de tamanho M = 3 e compare com o hash do padrão.
 
 !!! Otimização: Evitando Recálculos
 
-Você deve ter notado que no Exercício 3, recalcular o hash (`1+1+1`), (`1+1+1`), etc., parece repetitivo.
+Você deve ter notado que no Exercício 3, recalcular o hash (`~ 1+1+1`), (`~ 1+1+1`), etc., parece repetitivo.
 
 Não precisamos! Podemos "deslizar" o hash em tempo $O(1)$ usando uma fórmula simples, pois é apenas uma soma:
 
 h(next) = h(curr) − value(outgoing) + value(incoming)
 
 **Exemplo:**
-* Hash atual (índice 2-4) ` "A A A"` = **3**
-* Próxima janela (índice 3-5) ` "A A B"`
+* Hash atual (índice 2-4) `~ "A A A"` = **3**
+* Próxima janela (índice 3-5) `~ "A A B"`
 * Sai o caractere: 'A' (valor 1)
 * Entra o caractere: 'B' (valor 2)
 * Novo Hash = 3 - 1 + 2 = **4**
@@ -229,13 +226,13 @@ Quando isso ocorre, o algoritmo compara o hash (que bate!) e é forçado a verif
 |:-------|:-:|:-:|:-:|
 | Padrão | B | C | A |
 
-Suponha valores ` A=1, B=2, C=3, D=4` e função hash = soma dos valores.
+Suponha valores `~ A=1, B=2, C=3, D=4` e função hash = soma dos valores.
 
 ---
 
 ??? Exercício 6 — Identificando *spurious hits*
 
-1. Calcule o **hash do padrão** ->  ` B C A`.  
+1. Calcule o **hash do padrão** ->  `~ B C A`.  
 2. Depois, calcule o hash de cada trecho de 3 caracteres do texto.  
 3. Compare com o hash do padrão e identifique os falsos positivos — aqueles com **hash igual**, mas **caracteres diferentes**.
 
@@ -247,7 +244,7 @@ Suponha valores ` A=1, B=2, C=3, D=4` e função hash = soma dos valores.
 | 3–5 | A B C | ? |
 
 ::: Gabarito
-**Hash do padrão `B C A` = 2 + 3 + 1 = 6**
+**Hash do padrão `~ B C A` = 2 + 3 + 1 = 6**
 
 **Falsos positivos encontrados:**
 
@@ -258,7 +255,7 @@ Suponha valores ` A=1, B=2, C=3, D=4` e função hash = soma dos valores.
 | 2-4 | A A B | 4 |
 | 3–5 | A B C | 6 |
 
-Os trechos **"A D A"**, **"D A A"** e **"A B C"** têm hash **6**, igual ao do padrão ` B C A`,  
+Os trechos **"A D A"**, **"D A A"** e **"A B C"** têm hash **6**, igual ao do padrão `~ B C A`,  
 mas nenhum deles corresponde realmente ao padrão - são *spurious hits*.
 :::
 ???
@@ -309,8 +306,8 @@ reduzindo o risco de **falsos positivos**.
 ---
 ??? Exercício 8 — Recalcule com base = 10
 
-**Instruções:** usando **base = 10** e os valores ` A = 1`, ` B = 2`, ` C = 3`, ` D = 4`,  
-calcule o hash posicional (com potências) de cada trecho de tamanho 3 e compare com o hash do padrão ` B C A`.
+**Instruções:** usando **base = 10** e os valores `~ A = 1`, `~ B = 2`, `~ C = 3`, `~ D = 4`,  
+calcule o hash posicional (com potências) de cada trecho de tamanho 3 e compare com o hash do padrão `~ B C A`.
 
 Use a fórmula:
 
@@ -326,13 +323,13 @@ Tabela original (para referência):
 | 2-4 | A A B | 4 |
 | 3–5 | A B C | 6 |
 
-1. Calcule o **hash do padrão** ` B C A`.  
+1. Calcule o **hash do padrão** `~ B C A`.  
 2. Calcule o hash dos trechos que tinham dado o mesmo valor do padrão.  
 
 ::: Gabarito
 **Cálculos e respostas:**
 
-- **Hash do padrão ` B C A`:**  
+- **Hash do padrão `~ B C A`:**  
   $h_p = 2\times10^2 + 3\times10^1 + 1\times10^0 = 200 + 30 + 1 = \mathbf{231}$
 
 - **Hashes dos trechos (base = 10):**
@@ -358,8 +355,8 @@ Tabela original (para referência):
 1. Usar potências faz com que **a posição de cada caractere influencie o resultado**.  
    Diferente da soma, a ordem agora importa: “A B C” ≠ “B C A”.
 Vamos comparar os dois padrões com $d=10$:
-- ` A B C` = $(1\times10^2)+(2\times10^1)+(3\times10^0)=123$
-- ` B C A` = $(2\times10^2)+(3\times10^1)+(1\times10^0)=231$ 
+- `~ A B C` = $(1\times10^2)+(2\times10^1)+(3\times10^0)=123$
+- `~ B C A` = $(2\times10^2)+(3\times10^1)+(1\times10^0)=231$ 
 
 (Na soma simples, ambos seriam '6').
 
@@ -399,15 +396,15 @@ onde:
 
 ??? Exercício 10 – Acompanhe o Rolling Hash
 
-**Texto:**  ` A D A A B C`  
-**Padrão:** ` A A B`  
-**Valores:** ` A=1`, ` B=2`, ` C=3`, ` D=4`, base $d=10$, $M=3$
+**Texto:**  `~ A D A A B C`  
+**Padrão:** `~ A A B`  
+**Valores:** `~ A=1`, `~ B=2`, `~ C=3`, `~ D=4`, base $d=10$, $M=3$
 
-1. Calcule o hash do **padrão** ` A A B`.  
-2. Calcule o hash da primeira janela (` A D A`).  
+1. Calcule o hash do **padrão** `~ A A B`.  
+2. Calcule o hash da primeira janela (`~ A D A`).  
 3. Aplique a fórmula do *rolling hash* (sem módulo, para simplificar) para encontrar o valor das janelas seguintes:  
-   - ` A D A` → ` D A A`  
-   - ` D A A` → ` A A B`  
+   - `~ A D A` → `~ D A A`  
+   - `~ D A A` → `~ A A B`  
 4. Onde ocorre o *match*?
 
 ::: Gabarito
