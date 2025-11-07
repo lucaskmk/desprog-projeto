@@ -203,12 +203,12 @@ Os trechos **"A D A"**, **"D A A"** e **"A B C"** têm hash **6**, igual ao do p
 
 Para resolver o problema das colisões, precisamos de uma função de hash que considere a **posição** dos caracteres.
 
-O **Rabin-Karp** faz isso tratando a string como um número em uma **base**, onde cada posição tem um peso diferente ($10^{m-1}, 10^{m-2},… 10^0$). Assim, ` B C A` terá um hash diferente de ` A B C`. Isso reduz drasticamente a chance de colisões, tornando-as muito raras.
+O **Rabin-Karp** faz isso tratando a string como um número em uma **base**, onde cada posição tem um peso diferente ($10^{m-1}, 10^{m-2},… 10^0$). Assim, `~B C A` terá um hash diferente de `~A B C`. Isso reduz drasticamente a chance de colisões, tornando-as muito raras.
 
 ---
 ??? Exercício 5 — Resolvendo os Falsos Positivos
 
-**Instruções:** usando **base = 10** e os valores `~ A = 1`, `~ B = 2`, `~ C = 3`, `~ D = 4`, recalcule o hash dos trechos do exercício anterior, onde a colisão ocorreu.
+**Instruções:** usando **base = 10** e os valores `~A = 1`, `~B = 2`, `~C = 3`, `~D = 4`, recalcule o hash dos trechos do exercício anterior, onde a colisão ocorreu.
 
 Use a fórmula:
 
