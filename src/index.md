@@ -1,14 +1,13 @@
-Algoritmo de Rabin-Karp 
+Algoritmo de Rabin-Karp
 ======
 
 ## O Problema da Busca em Texto
 
-Vamos começar definindo o problema: 
-* Temos um Texto (uma longa sequência de **N** caracteres).
-* E um Padrão (uma sequência menor de **M** caracteres). 
+Vamos começar definindo o problema:
+*   Temos um Texto (uma longa sequência de **N** caracteres).
+*   E um Padrão (uma sequência menor de **M** caracteres).
 
-Queremos encontrar a Posição (o índice)
-onde o padrão aparece pela primeira vez no texto.
+Queremos encontrar a Posição (o índice) onde o padrão aparece pela primeira vez no texto.
 
 ??? Problema da Busca
 
@@ -28,8 +27,7 @@ Resposta = 14
 
 ## A Abordagem "Força Bruta"
 
-A primeira solução que vem à mente é a "força bruta". A ideia é simples: "deslizar" o padrão pelo texto, 
-uma posição de cada vez, e comparar caractere por caractere.
+A primeira solução que vem à mente é a "força bruta". A ideia é simples: "deslizar" o padrão pelo texto, uma posição de cada vez, e comparar caractere por caractere.
 
 Vamos ver isso em ação com nosso exemplo. O **padrão** é "roupa" (tamanho 5).
 
@@ -39,7 +37,7 @@ Vamos ver isso em ação com nosso exemplo. O **padrão** é "roupa" (tamanho 5)
 
 Vamos pensar no custo disso. Considere um Texto com **N** caracteres e um Padrão com **M** caracteres.
 
-No pior caso possível (ex: Texto = "AAAAAAAAAAAAAAAAAB" e Padrão = "AAB"), quantas comparações de caracteres o algoritmo de força bruta teria que fazer? 
+No pior caso possível (ex: Texto = "AAAAAAAAAAAAAAAAAB" e Padrão = "AAB"), quantas comparações de caracteres o algoritmo de força bruta teria que fazer?
 
 ::: Gabarito
 
@@ -58,7 +56,7 @@ Imagine um cenário real, como um sistema de verificação de plágio.
 
     Padrão (frase do aluno) com **M = 100** caracteres.
 
-Uma complexidade de $O(N×M)$ parece eficiente? 
+Uma complexidade de $O(N×M)$ parece eficiente?
 
 ::: Gabarito
 
@@ -76,27 +74,26 @@ A regra de ouro do hashing é: se duas strings são idênticas, seus hashes têm
 Em vez de comparar cada caractere do texto com o padrão, o algoritmo compara apenas os **valores hash**, o que é muito mais rápido.
 
 ---
-??? Para os exercicios a seguir adote:
+??? Para os exercícios a seguir adote:
 
 **Valores para cada caractere:**
 | Posição | Hashcode |
-|---------:|:---------|
-| 1       | A        |
-| 2       | B        |
-| 3       | C        |
-| 4       | D        |
-| 5       | E        |
-| …       | …        |
+|:---:|:---|
+| 1 | A |
+| 2 | B |
+| 3 | C |
+| 4 | D |
+| … | … |
 
 **Texto:** N = 6
 | Índice | 0 | 1 | 2 | 3 | 4 | 5 |
-|:-------|:-:|:-:|:-:|:-:|:-:|:-:|
-| Texto  | A | B | D | C | A | B |
+|:---|:---:|:---:|:---:|:---:|:---:|:---:|
+| Texto | A | B | D | C | A | B |
 
 **Padrão:** M = 3
 
 | Índice | 0 | 1 | 2 |
-|:-------|:-:|:-:|:-:|
+|:---|:---:|:---:|:---:|
 | Padrão | C | A | B |
 
 **Exercício 1 – Hash do Padrão**
@@ -114,7 +111,6 @@ C A B = 3 + 1 + 2 = 6
 :::
 ???
 
-
 ??? Exercício 2 – Hash do Primeiro Trecho do Texto
 
 Agora, calcule o hash dos **3 primeiros caracteres** do texto `~ A B D`:
@@ -127,13 +123,12 @@ A B D = 1 + 2 + 4 = 7
 :::
 ???
 
-
 ??? Exercício 3 – Percorrendo o Texto
 
-Calcule o hash de cada trecho de tamanho M = 3 e compare com o hash do padrão.
+Calcule o hash de cada trecho de tamanho M = 3 e compare com o hash do padrão (6).
 
 | Posição | Trecho | h(t ) | Igual ao h(p ) ? |
-|----------|---------|------|----------------|
+|:---|:---|:---|:---|
 | 0–2 | A B D | ? | ? |
 | 1–3 | B D C | ? | ? |
 | 2–4 | D C A | ? | ? |
@@ -141,7 +136,7 @@ Calcule o hash de cada trecho de tamanho M = 3 e compare com o hash do padrão.
 
 ::: Gabarito
 | Posição | Trecho | h(t) | Igual ao h(p ) ? |
-|----------|---------|------|----------------|
+|:---|:---|:---|:---|
 | 0–2 | A B D | 7 | ❌ |
 | 1–3 | B D C | 9 | ❌ |
 | 2–4 | D C A | 8 | ❌ |
@@ -150,65 +145,12 @@ Calcule o hash de cada trecho de tamanho M = 3 e compare com o hash do padrão.
 ✅ O padrão foi encontrado na posição **3** do texto.
 :::
 ???
-
 ---
+## O Problema do Hash Simples: *Spurious Hits* (Falsos Positivos)
 
-!!! Otimização: Evitando Recálculos
+Nosso primeiro exemplo funcionou bem, mas a função de soma simples tem um problema grave.
 
-Você deve ter notado que no Exercício 3, recalcular o hash (`~4+3+1`), (`~3+1+2`), etc., parece repetitivo.
-
-Não precisamos! Podemos **"deslizar"** o hash em tempo $O(1)$ usando uma fórmula simples, pois é apenas uma soma:
-
-$$h(next) = h(curr) − value(outgoing) + value(incoming)$$
-
-
-**Exemplo:**
-* Hash atual (índice 2-4) `~ "D C A"` = **8**
-* Próxima janela (índice 3-5) `~ "C A B"`
-* Sai o caractere: 'D' (valor 1)
-* Entra o caractere: 'B' (valor 2)
-* Novo Hash = 8 - 4 + 2 = **6**
-
-Esta técnica de atualização em $O(1)$ é o "pulo do gato" que nos permite deslizar a janela eficientemente.
-!!!
-
----
-
-:hash_opt
-
-??? Exercício 4 – Reflexão
-
-Por que o algoritmo usa o valor de hash em vez de comparar caractere por caractere?
-
-::: Gabarito
-Porque comparar apenas os **valores hash** é **muito mais rápido**: 
-
-Ao inves de comparar cada letra, o algoritmo compara **números resumidos** de cada trecho. Se os números são diferentes, ele já sabe que o trecho não combina — sem precisar verificar caractere por caractere.
-:::
-???
-
-??? Exercício 5 – Complexidade sem falsos positivos
-
-O algoritmo encontrou **apenas um resultado correto** e **nenhum falso positivo**.  
-Ou seja, ele percorreu o texto comparando apenas os valores de hash, sem precisar verificar caractere por caractere.
-
-**Pergunta:** Qual é a complexidade desse caso? Explique o motivo.
-
-::: Gabarito
-Quando não há falsos positivos, o algoritmo realiza apenas as comparações de hash,  
-percorrendo o texto uma vez $O(N)$ e calculando o hash do padrão $O(M)$.
-
-Complexidade: $O(N + M)$ O algoritmo é rápido, pois não precisa fazer verificações adicionais caractere a caractere.
-:::
-???
----
-## Problema dos *Spurious Hits* (falsos positivos)
-
-Otimizar o recálculo para $O(1)$ é ótimo, mas nossa função de hash (soma simples) ainda tem um problema grave.
-
-**Falsos positivos** (ou *spurious hits*) acontecem quando **dois trechos diferentes** produzem o **mesmo valor de hash**, mesmo que os caracteres não sejam iguais.
-
-Quando isso ocorre, o algoritmo compara o hash (que bate!) e é forçado a verificar caractere por caractere, apenas para descobrir que era um alarme falso. Esses casos aumentam o custo da busca, podendo levar à complexidade $O(N·M)$.
+**Falsos positivos** (ou *spurious hits*) acontecem quando **dois trechos diferentes** produzem o **mesmo valor de hash**. Vamos ver um caso onde isso acontece.
 
 ---
 
@@ -217,30 +159,30 @@ Quando isso ocorre, o algoritmo compara o hash (que bate!) e é forçado a verif
 **Texto:** N = 6
 
 | Índice | 0 | 1 | 2 | 3 | 4 | 5 |
-|:-------|:-:|:-:|:-:|:-:|:-:|:-:|
-| Texto  | A | D | A | A | B | C |
+|:---|:---:|:---:|:---:|:---:|:---:|:---:|
+| Texto | A | D | A | A | B | C |
 
 **Padrão:** M = 3
 
 | Índice | 0 | 1 | 2 |
-|:-------|:-:|:-:|:-:|
+|:---|:---:|:---:|:---:|
 | Padrão | B | C | A |
 
 Suponha valores `~ A=1, B=2, C=3, D=4` e função hash = soma dos valores.
 
 ---
 
-??? Exercício 6 — Identificando *spurious hits*
+??? Exercício 4 — Identificando *spurious hits*
 
-1. Calcule o **hash do padrão** ->  `~ B C A`.  
-2. Depois, calcule o hash de cada trecho de 3 caracteres do texto.  
-3. Compare com o hash do padrão e identifique os falsos positivos — aqueles com **hash igual**, mas **caracteres diferentes**.
+1.  Calcule o **hash do padrão** -> `~ B C A`.
+2.  Depois, calcule o hash de cada trecho de 3 caracteres do texto.
+3.  Identifique os falsos positivos — aqueles com **hash igual**, mas **caracteres diferentes**.
 
-| Posição | Trecho |  h(t) |
-|----------|---------|------|
+| Posição | Trecho | h(t) |
+|:---|:---|:---|
 | 0–2 | A D A | ? |
-| 1–3 | D A A | ? | 
-| 2–4 | A A B | ? | 
+| 1–3 | D A A | ? |
+| 2–4 | A A B | ? |
 | 3–5 | A B C | ? |
 
 ::: Gabarito
@@ -249,181 +191,162 @@ Suponha valores `~ A=1, B=2, C=3, D=4` e função hash = soma dos valores.
 **Falsos positivos encontrados:**
 
 | Posição | Trecho | h(t) |
-|----------|---------|------|
+|:---|:---|:---|
 | 0–2 | A D A | 6 |
 | 1–3 | D A A | 6 |
 | 2-4 | A A B | 4 |
 | 3–5 | A B C | 6 |
 
-Os trechos **"A D A"**, **"D A A"** e **"A B C"** têm hash **6**, igual ao do padrão `~ B C A`,  
-mas nenhum deles corresponde realmente ao padrão - são *spurious hits*.
-:::
-???
-
-
-??? Exercício 7 – Complexidade com falsos positivos (*spurious hits*)
-
-Alguns trechos diferentes do texto geraram **o mesmo valor de hash** do padrão,  
-mas ao comparar os caracteres, o algoritmo percebeu que **não eram correspondências reais** (*spurious hits*).
-
-**Pergunta:** Como isso afeta a complexidade do algoritmo? Explique se ele se torna mais lento nesse caso.
-
-::: Gabarito
-
-Quando ocorrem falsos positivos, o algoritmo precisa **comparar caractere por caractere** em cada posição onde o hash é igual - aumentando o número de operações.
-
-Complexidade: $O(N·M)$
-
-Isso acontece porque, no pior caso, o algoritmo pode ter que fazer uma comparação completa $O(M)$ em *todas* as N janelas, assim como a força bruta.
+Os trechos **"A D A"**, **"D A A"** e **"A B C"** têm hash **6**, igual ao do padrão `~ B C A`, mas nenhum deles corresponde realmente ao padrão. São todos *spurious hits*.
 :::
 ???
 ---
+## A Solução: Hashing Polinomial
 
-## Introduzindo o algoritmo de Rabin-Karp
+Para resolver o problema das colisões, precisamos de uma função de hash que considere a **posição** dos caracteres.
 
-
-Agora que entendemos o que é hashing e vimos os problemas de colisão (*spurious hits*),  
-vamos conhecer uma forma **mais robusta de gerar hashes** — e **mais eficiente** de calculá-los.
-
-A resposta para tornar a busca ainda mais eficiente está em duas ideias-chave:
-1. O uso de **hashing com potências**;
-2. E, mais importante, uma otimização genial chamada **rolling hash**.
-
+O **Rabin-Karp** faz isso tratando a string como um número em uma **base**, onde cada posição tem um peso diferente ($10^{m-1}, 10^{m-2},… 10^0$). Assim, `BCA` terá um hash diferente de `ABC`. Isso reduz drasticamente a chance de colisões, tornando-as muito raras.
 
 ---
+??? Exercício 5 — Resolvendo os Falsos Positivos
 
-## Construindo o hash com potências de 10
-
-Até agora, usamos a soma simples (ex: 1 + 1 + 2).  
-
-Mas o **Rabin-Karp** trata a string como um número em uma **base**, onde cada posição tem um peso diferente ($10^{m-1}, 10^{m-2},… 10^0$).
-
-Assim, strings diferentes raramente terão o mesmo hash — reduzindo o risco de **falsos positivos**.
-
----
-??? Exercício 8 — Recalcule com base = 10
-
-**Instruções:** usando **base = 10** e os valores `~ A = 1`, `~ B = 2`, `~ C = 3`, `~ D = 4`,  
-calcule o hash posicional (com potências) de cada trecho de tamanho 3 e compare com o hash do padrão `~ B C A`.
+**Instruções:** usando **base = 10** e os valores `~ A = 1`, `~ B = 2`, `~ C = 3`, `~ D = 4`, recalcule o hash dos trechos do exercício anterior, onde a colisão ocorreu.
 
 Use a fórmula:
 
 $h(\text{trecho}) = p_0\times10^2 + p_1\times10^1 + p_2\times10^0$
 
-
-Tabela original (para referência):
-
-| Posição | Trecho | h(t) |
-|----------|---------|------|
-| 0–2 | A D A | 6 |
-| 1–3 | D A A | 6 |
-| 2-4 | A A B | 4 |
-| 3–5 | A B C | 6 |
-
-1. Calcule o **hash do padrão** `~ B C A`.  
-2. Calcule o hash dos trechos que tinham dado o mesmo valor do padrão.  
+1.  Calcule o **hash do padrão** `~ B C A`.
+2.  Calcule o hash dos trechos que antes deram o mesmo valor (6).
 
 ::: Gabarito
 **Cálculos e respostas:**
 
-- **Hash do padrão `~ B C A`:**  
-  $h_p = 2\times10^2 + 3\times10^1 + 1\times10^0 = 200 + 30 + 1 = \mathbf{231}$
+-   **Hash do padrão `~ B C A`:**
+    $h_p = 2\times10^2 + 3\times10^1 + 1\times10^0 = 200 + 30 + 1 = \mathbf{231}$
 
-- **Hashes dos trechos (base = 10):**
+-   **Hashes dos trechos (base = 10):**
 
 | Posição | Trecho | h(t) |
-|---------|--------|------:|
-| 0–2     | A D A  | 141   |
-| 1–3     | D A A  | 411   |
-| 2–4     | A A B  | 112   |
-| 3–5     | A B C  | 123   |
+|:---|:---|---:|
+| 0–2 | A D A | 141 |
+| 1–3 | D A A | 411 |
+| 3–5 | A B C | 123 |
 
-**Conclusão:** nenhum dos trechos tem hash igual a **231**, portanto **não há spurious hits** neste esquema posicional (base = 10).
+**Conclusão:** nenhum dos trechos tem hash igual a **231**. As colisões que tínhamos antes desapareceram!
 :::
 ???
 
-??? Exercício 9 – Hash com Potências
- 
-1. Por que usar potências ajuda a evitar colisões (comparado à soma simples)?  
-2. Qual é a complexidade de calcular esse hash do zero?
+??? Checkpoint: O Passo Final e Obrigatório
+
+O hash polinomial torna as colisões muito raras, mas **não impossíveis**. Por exemplo, com um alfabeto maior, as strings `BAA` e `AKA` poderiam gerar o mesmo hash.
+
+**Pergunta:** Digamos que, ao percorrer o texto, você encontra um trecho cujo hash polinomial é **idêntico** ao hash do padrão. O que o algoritmo deve fazer para ter 100% de certeza de que encontrou o padrão?
+
+::: Gabarito
+Ele deve fazer uma **verificação final, caractere por caractere**, apenas para aquele trecho.
+
+*   Se os caracteres também baterem, é um **match verdadeiro**.
+*   Caso contrário, era um *spurious hit* raro e a busca continua.
+
+**Lembre-se: toda vez que os hashes são iguais, a verificação manual é obrigatória para confirmar.**
+:::
+???
+
+---
+## O Novo Problema: A Eficiência do Cálculo
+
+O hash polinomial é ótimo, mas temos um novo problema.
+
+??? Exercício 6 – Análise de Custo
+
+1.  Por que usar potências ajuda a evitar colisões?
+2.  Qual é a complexidade de calcular o hash polinomial do zero para **uma** janela de tamanho **M**?
+3.  Se fizermos isso para **todas** as `N-M+1` janelas, qual será a complexidade total do algoritmo?
 
 ::: Gabarito
 
-1. Usar potências faz com que **a posição de cada caractere influencie o resultado**.  
-   Diferente da soma, a ordem agora importa: “A B C” ≠ “B C A”.
-Vamos comparar os dois padrões com $d=10$:
-- `~ A B C` = $(1\times10^2)+(2\times10^1)+(3\times10^0)=123$
-- `~ B C A` = $(2\times10^2)+(3\times10^1)+(1\times10^0)=231$ 
+1.  Usar potências faz com que **a posição de cada caractere influencie o resultado**. Diferente da soma, a ordem agora importa: `ABC` (123) ≠ `BCA` (231).
 
-(Na soma simples, ambos seriam '6').
+2.  O cálculo direto do hash tem complexidade **O(M)**, pois percorre cada caractere uma vez para aplicar a fórmula.
 
-2. O cálculo direto do hash tem complexidade **O(M)**,  
-   pois percorre cada caractere uma vez para aplicar a fórmula.  
-   (Com *rolling hash*, a atualização entre janelas cai para **O(1)**.)
+3.  Se calcularmos um hash de custo O(M) para cada uma das ~N janelas, a complexidade total volta a ser **O(N×M)**, a mesma da força bruta! Resolvemos um problema, mas perdemos toda a eficiência.
 :::
 ???
+
+---
+## A Solução Final: *Rolling Hash*
+
+Para evitar recalcular o hash inteiro a cada passo, usamos a técnica do **rolling hash**: a partir do hash do trecho atual, atualizamos o valor em tempo **O(1)** para obter o hash da próxima janela.
 
 !!!Implementando o Rolling Hash
 
-O problema do hash polinomial é que, ingenuamente, ele também parece ser $O(M)$ para calcular em cada janela (como no Exercício 8). Se fizermos isso, voltamos à complexidade $O(N\times M)$.
+A lógica é:
+1.  Pegue o hash da janela atual.
+2.  **Remova** a contribuição do caractere que está saindo (o mais à esquerda).
+3.  **"Desloque"** o resto do valor para a esquerda (multiplicando pela base).
+4.  **Adicione** a contribuição do novo caractere que está entrando (o mais à direita).
 
-Para evitar recalcular a soma inteira a cada passo, usa-se um **rolling hash**: 
-a partir do hash do trecho atual, subtrai-se o valor do caractere que saiu e adiciona-se o valor do caractere que entrou. Assim o custo por deslocamento fica $O(1)$ (em vez de $O(M)$).
+Fórmula: $h_{next} = (h_{curr} - p_{out} \times 10^{M-1}) \times 10 + p_{in}$
 !!!
 ---
-## Aplicando a Janela Deslizante 
 
-A ideia do rolling hash é atualizar o hash da janela atual sem recalcular do zero. Usamos a representação posicional do hash (base d) e, na implementação prática, normalmente aplicamos um módulo primo $q$ para evitar *overflow* (números gigantes).
+??? Exercício 7 – Acompanhe o Rolling Hash
 
-- Remove o valor do caractere que sai da janela (que estava na posição mais significativa),
-- Multiplica o restante pela base $d$ ("dá um shift" para a esquerda),
-- Adiciona o novo caractere que entra (na posição menos significativa).
-
-Fórmula geral (com módulo)
-
-$$
-h_{next} = \bigl( (h_{curr} - p_{out} \times 10^{M-1}) \times 10 + p_{in} \bigr) \
-$$
-
-onde:
-- $p_{out}$: valor do caractere que saiu da janela;  
-- $p_{in}$: valor do caractere que entrou;   
-
----
-
-??? Exercício 10 – Acompanhe o Rolling Hash
-
-**Texto:**  `~ A D A A B C`  
-**Padrão:** `~ A A B`  
+**Texto:** `~ A D A A B C`
+**Padrão:** `~ A A B`
 **Valores:** `~ A=1`, `~ B=2`, `~ C=3`, `~ D=4`, base $d=10$, $M=3$
 
-1. Calcule o hash do **padrão** `~ A A B`.  
-2. Calcule o hash da primeira janela (`~A D A`).  
-3. Aplique a fórmula do *rolling hash* (sem módulo, para simplificar) para encontrar o valor das janelas seguintes:  
-   - `~ A D A` → `~ D A A`  
-   - `~ D A A` → `~ A A B`  
-4. Onde ocorre o *match*?
+1.  Calcule o hash do **padrão** `~ A A B`.
+2.  Calcule o hash da primeira janela (`~A D A`).
+3.  Aplique a fórmula do *rolling hash* para encontrar o valor das janelas seguintes até encontrar o padrão.
+    -   `~ A D A` → `~ D A A`
+    -   `~ D A A` → `~ A A B`
 
 ::: Gabarito
-1. $h(padrão)=(1 \times 10^2)+(1 \times 10^1)+(2 \times 10^0)=112$ 
-2. 
-* **Janela 1 (A D A):**
-    * $(1 \times 10^2)+(4 \times 10^1)+(1 \times 10^0)=141$
-3. 
-* **Janela 2 (D A A):**
-    * $h_1 = (h_0 - p_{out} \times d^{M-1}) \times d + p_{in}$
-    * $h_1 = (141 - 1 \times 10^2) \times 10 + 1$
-    * $h_1 = (141 - 100) \times 10 + 1 = 41 \times 10 + 1 = 411$
-* **Janela 3 (A A B):**
-    * $h_2 = (h_1 - p_{out} \times d^{M-1}) \times d + p_{in}$
-    * $h_2 = (411 - 4 \times 10^2) \times 10 + 2$
-    * $h_2 = (411 - 400) \times 10 + 2 = 11 \times 10 + 2 = 112$
-4. **Match** encontrado! $h_2$ (112) == $h(padrão)$ (112). A janela começa no índice **2**.
+1.  $h(padrão)=(1 \times 10^2)+(1 \times 10^1)+(2 \times 10^0)=112$
+2.  
+    *   **Janela 1 (A D A):**
+        *   $(1 \times 10^2)+(4 \times 10^1)+(1 \times 10^0)=141$
+3.  
+    *   **Janela 2 (D A A):**
+        *   $h_1 = (h_0 - p_{out} \times d^{M-1}) \times d + p_{in}$
+        *   $h_1 = (141 - 1 \times 10^2) \times 10 + 1$
+        *   $h_1 = (141 - 100) \times 10 + 1 = 41 \times 10 + 1 = 411$
+    *   **Janela 3 (A A B):**
+        *   $h_2 = (h_1 - p_{out} \times d^{M-1}) \times d + p_{in}$
+        *   $h_2 = (411 - 4 \times 10^2) \times 10 + 2$
+        *   $h_2 = (411 - 400) \times 10 + 2 = 11 \times 10 + 2 = 112$
+4.  **Match** encontrado! $h_2$ (112) == $h(padrão)$ (112). A janela começa no índice **2**.
 :::
 ???
 
 ---
+## Análise de Complexidade Final
 
+Agora que temos o algoritmo completo e eficiente, vamos analisar seu custo.
+
+??? Checkpoint Final
+
+**Pergunta 1:** Qual é a complexidade do Rabin-Karp no **melhor caso** (poucos ou nenhum falso positivo)?
+
+::: Gabarito
+O algoritmo calcula o hash inicial em $O(M)$ e depois faz $N-M$ atualizações de $O(1)$.
+
+Complexidade: **$O(N + M)$**. O algoritmo é extremamente rápido.
+:::
+???
+
+??? **Pergunta 2:** Qual é a complexidade no **pior caso** (uma função de hash ruim que gera falsos positivos em todas as janelas)?
+
+::: Gabarito
+Quando ocorrem falsos positivos, o algoritmo precisa **comparar caractere por caractere** ($O(M)$) em cada posição onde o hash é igual. Se isso acontecer em todas as $N$ janelas, o custo volta a ser o da força bruta.
+
+Complexidade: **$O(N·M)$**.
+:::
+???
+
+---
 
 Enzo Ristori​
 
