@@ -4,8 +4,8 @@ Algoritmo de Rabin-Karp
 ## O Problema da Busca em Texto
 
 Vamos começar definindo o problema: 
-* Temos um Texto (uma longa sequência de caracteres).
-* E um Padrão (uma sequência menor). 
+* Temos um Texto (uma longa sequência de **N** caracteres).
+* E um Padrão (uma sequência menor de **M** caracteres). 
 
 Queremos encontrar a Posição (o índice)
 onde o padrão aparece pela primeira vez no texto.
@@ -37,7 +37,7 @@ Vamos ver isso em ação com nosso exemplo. O **padrão** é "roupa" (tamanho 5)
 
 ??? Checkpoint
 
-Vamos pensar no custo disso. Considere um Texto com n caracteres e um Padrão com **M** caracteres.
+Vamos pensar no custo disso. Considere um Texto com **N** caracteres e um Padrão com **M** caracteres.
 
 No pior caso possível (ex: Texto = "AAAAAAAAAAAAAAAAAB" e Padrão = "AAB"), quantas comparações de caracteres o algoritmo de força bruta teria que fazer? 
 
@@ -73,8 +73,7 @@ Definitivamente não. É um custo computacional altíssimo. Precisamos de uma fo
 **Hashing** é uma ideia matemática que transforma o texto em números.  A melhor forma de pensar nisso é como se fosse uma “impressão” digital” de um texto. O algoritmo pega uma string, que pode ser longa, e converte em um único numero.
 A regra de ouro do hashing é: se duas strings são idênticas, seus hashes têm que ser o mesmo. Isso nos leva a uma conclusão muito importante, que é o segredo da velocidade do algoritmo, de que se dois hashes são diferentes, temos 100% de certeza que as strings também são diferentes.
 
-Em vez de comparar cada caractere do texto com o padrão, o algoritmo compara apenas os **valores hash**,  
-o que é muito mais rápido.
+Em vez de comparar cada caractere do texto com o padrão, o algoritmo compara apenas os **valores hash**, o que é muito mais rápido.
 
 ---
 ??? Para os exercicios a seguir adote:
@@ -92,25 +91,25 @@ o que é muito mais rápido.
 **Texto:** N = 6
 | Índice | 0 | 1 | 2 | 3 | 4 | 5 |
 |:-------|:-:|:-:|:-:|:-:|:-:|:-:|
-| Texto  | A | A | A | A | A | B |
+| Texto  | A | B | D | C | A | B |
 
 **Padrão:** M = 3
 
 | Índice | 0 | 1 | 2 |
 |:-------|:-:|:-:|:-:|
-| Padrão | A | A | B |
+| Padrão | C | A | B |
 
 **Exercício 1 – Hash do Padrão**
 
 A ideia mais basica de um hash é transformar o padrão em um número, somando os valores de cada caractere.
 
-Assim, o algoritmo pode comparar números em vez de letras, tornando a busca muito mais rápida.
+Assim, o algoritmo pode comparar um número, o **hash**, em vez de ter que varrer vários caractéres, tornando a busca muito mais rápida.
 
-Por exemplo, se atribuirmos `~ A = 1` e `~ B = 2`, o padrão `~ A A B` pode ser representado por um hash que é...
+Por exemplo, se atribuirmos `~ A = 1`, `~ B = 2` e `~ C = 3`, o padrão `~ C A B` pode ser representado por um hash que é...
 
 ::: Gabarito
-```~
-A A B = 1 + 1 + 2 = 4
+```
+C A B = 3 + 1 + 2 = 6
 ```
 :::
 ???
@@ -118,12 +117,12 @@ A A B = 1 + 1 + 2 = 4
 
 ??? Exercício 2 – Hash do Primeiro Trecho do Texto
 
-Agora, calcule o hash dos **3 primeiros caracteres** do texto `~ A A A`:
+Agora, calcule o hash dos **3 primeiros caracteres** do texto `~ A B D`:
 Qual é o valor do hash desse trecho?
 
 ::: Gabarito
-```~
-A A A = 1 + 1 + 1 = 3
+```
+A B D = 1 + 2 + 4 = 7
 ```
 :::
 ???
@@ -135,18 +134,18 @@ Calcule o hash de cada trecho de tamanho M = 3 e compare com o hash do padrão.
 
 | Posição | Trecho | h(t ) | Igual ao h(p ) ? |
 |----------|---------|------|----------------|
-| 0–2 | A A A | ? | ? |
-| 1–3 | A A A | ? | ? |
-| 2–4 | A A A | ? | ? |
-| 3–5 | A A B | ? | ? |
+| 0–2 | A B D | ? | ? |
+| 1–3 | B D C | ? | ? |
+| 2–4 | D C A | ? | ? |
+| 3–5 | C A B | ? | ? |
 
 ::: Gabarito
 | Posição | Trecho | h(t) | Igual ao h(p ) ? |
 |----------|---------|------|----------------|
-| 0–2 | A A A | 3 | ❌ |
-| 1–3 | A A A | 3 | ❌ |
-| 2–4 | A A A | 3 | ❌ |
-| 3–5 | A A B | 4 | ✅ |
+| 0–2 | A B D | 7 | ❌ |
+| 1–3 | B D C | 9 | ❌ |
+| 2–4 | D C A | 8 | ❌ |
+| 3–5 | C A B | 6 | ✅ |
 
 ✅ O padrão foi encontrado na posição **3** do texto.
 :::
@@ -156,18 +155,19 @@ Calcule o hash de cada trecho de tamanho M = 3 e compare com o hash do padrão.
 
 !!! Otimização: Evitando Recálculos
 
-Você deve ter notado que no Exercício 3, recalcular o hash (`~ 1+1+1`), (`~ 1+1+1`), etc., parece repetitivo.
+Você deve ter notado que no Exercício 3, recalcular o hash (`~4+3+1`), (`~3+1+2`), etc., parece repetitivo.
 
-Não precisamos! Podemos "deslizar" o hash em tempo $O(1)$ usando uma fórmula simples, pois é apenas uma soma:
+Não precisamos! Podemos **"deslizar"** o hash em tempo $O(1)$ usando uma fórmula simples, pois é apenas uma soma:
 
-h(next) = h(curr) − value(outgoing) + value(incoming)
+$$h(next) = h(curr) − value(outgoing) + value(incoming)$$
+
 
 **Exemplo:**
-* Hash atual (índice 2-4) `~ "A A A"` = **3**
-* Próxima janela (índice 3-5) `~ "A A B"`
-* Sai o caractere: 'A' (valor 1)
+* Hash atual (índice 2-4) `~ "D C A"` = **8**
+* Próxima janela (índice 3-5) `~ "C A B"`
+* Sai o caractere: 'D' (valor 1)
 * Entra o caractere: 'B' (valor 2)
-* Novo Hash = 3 - 1 + 2 = **4**
+* Novo Hash = 8 - 4 + 2 = **6**
 
 Esta técnica de atualização em $O(1)$ é o "pulo do gato" que nos permite deslizar a janela eficientemente.
 !!!
@@ -180,9 +180,9 @@ Esta técnica de atualização em $O(1)$ é o "pulo do gato" que nos permite des
 Por que o algoritmo usa o valor de hash em vez de comparar caractere por caractere?
 
 ::: Gabarito
-Porque comparar apenas os **valores hash** é **muito mais rápido**:  
-em vez de comparar cada letra, o algoritmo compara **números resumidos** de cada trecho.  
-Se os números são diferentes, ele já sabe que o trecho não combina — sem precisar verificar caractere por caractere.
+Porque comparar apenas os **valores hash** é **muito mais rápido**: 
+
+Ao inves de comparar cada letra, o algoritmo compara **números resumidos** de cada trecho. Se os números são diferentes, ele já sabe que o trecho não combina — sem precisar verificar caractere por caractere.
 :::
 ???
 
@@ -191,8 +191,7 @@ Se os números são diferentes, ele já sabe que o trecho não combina — sem p
 O algoritmo encontrou **apenas um resultado correto** e **nenhum falso positivo**.  
 Ou seja, ele percorreu o texto comparando apenas os valores de hash, sem precisar verificar caractere por caractere.
 
-**Pergunta:** Qual é a complexidade desse caso?  
-Explique o motivo.
+**Pergunta:** Qual é a complexidade desse caso? Explique o motivo.
 
 ::: Gabarito
 Quando não há falsos positivos, o algoritmo realiza apenas as comparações de hash,  
@@ -244,7 +243,7 @@ Suponha valores `~ A=1, B=2, C=3, D=4` e função hash = soma dos valores.
 | 3–5 | A B C | ? |
 
 ::: Gabarito
-**Hash do padrão `~ B C A` = 2 + 3 + 1 = 6**
+**Hash do padrão** `~ B C A` = 2 + 3 + 1 = **6**
 
 **Falsos positivos encontrados:**
 
@@ -266,8 +265,7 @@ mas nenhum deles corresponde realmente ao padrão - são *spurious hits*.
 Alguns trechos diferentes do texto geraram **o mesmo valor de hash** do padrão,  
 mas ao comparar os caracteres, o algoritmo percebeu que **não eram correspondências reais** (*spurious hits*).
 
-**Pergunta:** Como isso afeta a complexidade do algoritmo?  
-Explique se ele se torna mais lento nesse caso.
+**Pergunta:** Como isso afeta a complexidade do algoritmo? Explique se ele se torna mais lento nesse caso.
 
 ::: Gabarito
 
@@ -297,11 +295,9 @@ A resposta para tornar a busca ainda mais eficiente está em duas ideias-chave:
 
 Até agora, usamos a soma simples (ex: 1 + 1 + 2).  
 
-Mas o **Rabin-Karp** trata a string como um número em uma **base**,  
-onde cada posição tem um peso diferente ($10^{m-1}, 10^{m-2},… 10^0$).
+Mas o **Rabin-Karp** trata a string como um número em uma **base**, onde cada posição tem um peso diferente ($10^{m-1}, 10^{m-2},… 10^0$).
 
-Assim, strings diferentes raramente terão o mesmo hash —  
-reduzindo o risco de **falsos positivos**.
+Assim, strings diferentes raramente terão o mesmo hash — reduzindo o risco de **falsos positivos**.
 
 ---
 ??? Exercício 8 — Recalcule com base = 10
@@ -401,7 +397,7 @@ onde:
 **Valores:** `~ A=1`, `~ B=2`, `~ C=3`, `~ D=4`, base $d=10$, $M=3$
 
 1. Calcule o hash do **padrão** `~ A A B`.  
-2. Calcule o hash da primeira janela (`~ A D A`).  
+2. Calcule o hash da primeira janela (`~A D A`).  
 3. Aplique a fórmula do *rolling hash* (sem módulo, para simplificar) para encontrar o valor das janelas seguintes:  
    - `~ A D A` → `~ D A A`  
    - `~ D A A` → `~ A A B`  
