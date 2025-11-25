@@ -165,26 +165,26 @@ Mas, se olharmos com atenção, as janelas vizinhas compartilham quase todas as 
 
 Observe a transição da primeira janela para a segunda, que você acabou de calcular:
 
-*   **Janela Atual (índices 0-2):** ` [A  B  D] C  A  B`  -> Soma = $7$
-*   **Próxima Janela (índices 1-3):** ` A [B  D  C] A  B`  -> Soma = ?
+*   **Janela Atual (índices 0-2):** `~ [A  B  D] C  A  B`  -> Soma = $7$
+*   **Próxima Janela (índices 1-3):** `~ A [B  D  C] A  B`  -> Soma = ?
 
 **Pense:** O que mudou exatamente?
 1.  Qual caractere **saiu** da soma quando a janela deslizou para a direita?
 2.  Qual caractere **entrou** na soma?
 
-Com base nisso, tente calcular a soma da **Próxima Janela** usando apenas o resultado da atual ($7$), sem somar o `B` e o `D` novamente.
+Com base nisso, tente calcular a soma da **Próxima Janela** usando apenas o resultado da atual ($7$), sem somar o `~ B` e o `~ D` novamente.
 
 ::: Gabarito
 
-*   **Saiu:** O caractere `A` (valor 1).
-*   **Entrou:** O caractere `C` (valor 3).
+*   **Saiu:** O caractere `~ A` (valor 1).
+*   **Entrou:** O caractere `~ C` (valor 3).
 
 A conta inteligente é:
 $$Hash_{novo} = Hash_{anterior} - Valor_{saiu} + Valor_{entrou}$$
 
 $$Hash_{novo} = 7 - 1 + 3 = 9$$
 
-Se conferirmos na tabela do exercício 3, o hash de `B D C` ($2+4+3$) é realmente **9**. Funciona!
+Se conferirmos na tabela do exercício 3, o hash de `~ B D C` ($2+4+3$) é realmente **9**. Funciona!
 
 :::
 ???
@@ -257,13 +257,13 @@ Os trechos **"A D A"**, **"D A A"** e **"A B C"** têm hash **6**, igual ao do p
 
 Para resolver o problema das colisões (anagramas), precisamos de uma função de hash onde a **posição** dos caracteres importe.
 
-O **Rabin-Karp** faz isso tratando a string como um número em uma **base**, onde cada posição tem um peso diferente ($10^{m-1}, 10^{m-2},… 10^0$). Assim, `~B C A` (231) terá um hash diferente de `~A B C` (123).
+O **Rabin-Karp** faz isso tratando a string como um número em uma **base**, onde cada posição tem um peso diferente ($10^{m-1}, 10^{m-2},… 10^0$). Assim, `~ B C A` (231) terá um hash diferente de `~ A B C` (123).
 
 ---
 
 ??? Exercício 6 — Resolvendo os Falsos Positivos
 
-**Instruções:** usando **base = 10** e os valores `~A = 1`, `~B = 2`, `~C = 3`, `~D = 4`, recalcule o hash dos trechos do exercício anterior, onde a colisão ocorreu.
+**Instruções:** usando **base = 10** e os valores `~ A = 1`, `~ B = 2`, `~ C = 3`, `~ D = 4`, recalcule o hash dos trechos do exercício anterior, onde a colisão ocorreu.
 
 Use a fórmula:
 $$h(\text{trecho}) = p_0\times10^2 + p_1\times10^1 + p_2\times10^0$$
@@ -293,7 +293,7 @@ $$h(\text{trecho}) = p_0\times10^2 + p_1\times10^1 + p_2\times10^0$$
 
 ??? Checkpoint: O Passo Final e Obrigatório
 
-O hash polinomial torna as colisões muito raras, mas **não impossíveis**. Por exemplo, com um alfabeto maior, as strings `~B A A` e `~A K A` poderiam gerar o mesmo hash.
+O hash polinomial torna as colisões muito raras, mas **não impossíveis**. Por exemplo, com um alfabeto maior, as strings `~ B A A` e `~ A K A` poderiam gerar o mesmo hash.
 
 **Pergunta:** Digamos que, ao percorrer o texto, você encontra um trecho cujo hash polinomial é **idêntico** ao hash do padrão. O que o algoritmo deve fazer para ter 100% de certeza de que encontrou o padrão?
 
@@ -333,15 +333,15 @@ A lógica é:
 
 ??? Exercício 7 – Acompanhe o Rolling Hash Polinomial
 
-**Texto:** `~A D A A B C`
-**Padrão:** `~A A B`
-**Valores:** `~A = 1`, `~B = 2`, `~C = 3`, `~D = 4`, base $d=10$, $M=3$
+**Texto:** `~ A D A A B C`
+**Padrão:** `~ A A B`
+**Valores:** `~ A = 1`, `~ B = 2`, `~ C = 3`, `~ D = 4`, base $d=10$, $M=3$
 
-1.  Calcule o hash do **padrão** `~A A B`.
-2.  Calcule o hash da primeira janela (`~A D A`).
+1.  Calcule o hash do **padrão** `~ A A B`.
+2.  Calcule o hash da primeira janela (`~ A D A`).
 3.  Aplique a fórmula do *rolling hash* para encontrar o valor das janelas seguintes até encontrar o padrão.
-    -   `~A D A` → `~D A A`
-    -   `~D A A` → `~A A B`
+    -   `~ A D A` → `~ D A A`
+    -   `~ D A A` → `~ A A B`
 
 ::: Gabarito
 
