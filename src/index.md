@@ -1,5 +1,4 @@
 Algoritmo de Rabin-Karp
-
 ======
 
 ## O Problema da Busca em Texto
@@ -166,7 +165,7 @@ Mas, se olharmos com atenção, as janelas vizinhas compartilham quase todas as 
 
 Observe a transição da primeira janela para a segunda, que você acabou de calcular:
 
-*   **Janela Atual (índices 0-2):** `[A  B  D] C  A  B`  -> Soma = $7$
+*   **Janela Atual (índices 0-2):** ` [A  B  D] C  A  B`  -> Soma = $7$
 *   **Próxima Janela (índices 1-3):** ` A [B  D  C] A  B`  -> Soma = ?
 
 **Pense:** O que mudou exatamente?
