@@ -186,6 +186,8 @@ $$Hash_{novo} = 7 - 1 + 3 = 9$$
 
 Se conferirmos na tabela do exercício 3, o hash de `~ B D C` ($2+4+3$) é realmente **9**. Funciona!
 
+:hash_rolling
+
 :::
 ???
 
@@ -363,6 +365,8 @@ A lógica é:
         *   $h_2 = (411 - 400) \times 10 + 2 = 11 \times 10 + 2 = 112$
 
 4.  **Match** encontrado! $h_2$ (112) == $h(padrão)$ (112). A janela começa no índice **2**.
+
+:rolling
 
 :::
 ???
